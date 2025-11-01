@@ -43,7 +43,7 @@
   <main>
     <section class="card">
       <h1>Training Series</h1>
-      <p class="lead">Enter your name and the access password to continue.</p>
+      <p class="lead">Enter your name and an access password to continue.</p>
 
       <form id="gateForm" novalidate>
         <label for="name">Your name</label>
@@ -59,26 +59,50 @@
   <footer>© <span id="yr"></span> Training</footer>
 
   <script>
-  const PASSWORD_PLAIN="cooldemo";
-  const WEBHOOK_URL="https://script.google.com/macros/s/AKfycbyB23AOVKrraH3h23YR-QCrrl5pVO4qUWDX1tmp84htriq0xxKDqwA0wHCNK15rHAMh/exec";
+  // --- Password → Course mapping ---
+  const PASSWORDS = {
+    "coolagent": "agent",
+    "coolsup":   "supervisor",
+    "cooladmin": "admin"
+  };
+
+  // --- Webhook for sign-ins (same Apps Script URL you already use) ---
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyB23AOVKrraH3h23YR-QCrrl5pVO4qUWDX1tmp84htriq0xxKDqwA0wHCNK15rHAMh/exec";
+
+  // --- Local storage keys ---
+  const AUTH_KEY="training_authed", NAME_KEY="training_visitor_name";
+
   document.getElementById("yr").textContent=new Date().getFullYear();
 
-  const AUTH_KEY="training_authed",NAME_KEY="training_visitor_name";
-  const form=document.getElementById("gateForm");
-  form.addEventListener("submit",e=>{
+  document.getElementById("gateForm").addEventListener("submit", (e) => {
     e.preventDefault();
-    const name=document.getElementById("name").value.trim();
-    const pass=document.getElementById("password").value;
-    const errorEl=document.getElementById("error");
-    errorEl.textContent="";
-    if(!name||!pass){errorEl.textContent="Please fill out both fields.";return;}
-    if(pass===PASSWORD_PLAIN){
-      localStorage.setItem(AUTH_KEY,"true");
-      localStorage.setItem(NAME_KEY,name);
-      try{fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({name,ts:new Date().toISOString(),ua:navigator.userAgent,page:location.href})});}catch(_){}
-      location.href=new URL("videos.html",location.href).toString();
-    }else{errorEl.textContent="Incorrect password. Please try again.";}
+    const name = document.getElementById("name").value.trim();
+    const pass = document.getElementById("password").value;
+    const errorEl = document.getElementById("error");
+    errorEl.textContent = "";
+
+    if (!name || !pass){ errorEl.textContent = "Please fill out both fields."; return; }
+
+    const course = PASSWORDS[pass];
+    if (!course){ errorEl.textContent = "Incorrect password. Please try again."; return; }
+
+    // mark authed
+    localStorage.setItem(AUTH_KEY, "true");
+    localStorage.setItem(NAME_KEY, name);
+
+    // ping webhook (type=signin)
+    try{
+      fetch(WEBHOOK_URL, {
+        method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          type:"signin", name, course, ts:new Date().toISOString(),
+          ua: navigator.userAgent, page: location.href
+        })
+      });
+    }catch(_){}
+
+    // go to videos.html with course
+    location.href = new URL(`videos.html?course=${encodeURIComponent(course)}`, location.href).toString();
   });
   </script>
 </body>
