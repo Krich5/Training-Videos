@@ -14,23 +14,36 @@
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
          background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--fg)}
     header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
-    .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .wrap{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
     .brand{font-weight:800;letter-spacing:.2px}
     .logo{height:36px}
+
+    main{max-width:1100px;margin:28px auto;padding:0 16px}
+    .shell{display:grid; grid-template-columns: 2fr 1fr; gap:22px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;
+          box-shadow:0 10px 30px rgba(0,0,0,.25);}
+    h1{margin:.1rem 0 .6rem;font-size:1.6rem}
+    .muted{color:var(--muted)}
+    .titleRow{display:flex;align-items:center;justify-content:space-between;gap:10px}
     .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;
          font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer}
     .btn.small{padding:8px 14px;font-size:.9rem}
     .btn.secondary{background:#0e1525;color:var(--fg);border:1px solid var(--border)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
     .btn:active{transform:translateY(1px)}
-    main{max-width:1000px;margin:28px auto;padding:0 16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
-    h1{margin:.1rem 0 .6rem;font-size:1.6rem}
-    .lead{color:var(--muted);margin-top:0}
-    .videos{display:grid;grid-template-columns:1fr;gap:22px;margin-top:14px}
-    .video h2{margin:.2rem 0 .6rem;font-size:1.1rem}
-    .embed{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:14px;background:#000;border:1px solid var(--border)}
-    .embed video{position:absolute;top:0;left:0;width:100%;height:100%;border:0;background:#000}
-    .nextwrap{text-align:right;margin-top:10px}
+    .embed{position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:14px; background:#000; border:1px solid var(--border)}
+    video.player{position:absolute; top:0; left:0; width:100%; height:100%; border:0; background:#000}
+    .row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px}
+    .pill{font-size:.85rem;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#0e1525}
+    /* playlist */
+    .list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+    .item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);
+          background:#0e1525;border-radius:12px}
+    .item[aria-current="true"]{outline:2px solid rgba(125,211,252,.35)}
+    .progress{height:8px;background:#0e1525;border:1px solid var(--border);border-radius:999px;overflow:hidden}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accentA),var(--accentB))}
+    .check{font-weight:700; color:#7dd3fc}
+    .done{opacity:.9}
   </style>
 </head>
 <body>
@@ -45,80 +58,227 @@
   </header>
 
   <main>
-    <section class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <h1>Training Videos</h1>
-        <p class="lead">Welcome, <strong id="who"></strong>.</p>
-      </div>
+    <div class="titleRow" style="margin-bottom:10px">
+      <h1 style="margin:0">Training Videos</h1>
+      <div class="muted">Welcome, <strong id="who"></strong></div>
+    </div>
 
-      <section class="videos">
-        <article id="v1" class="video">
-          <h2>Agent Login (Desktop)</h2>
-          <div class="embed">
-            <video controls preload="metadata" src="AgentVideos/Agent%20Login%20(Desktop).mp4"></video>
-          </div>
-          <div class="nextwrap"><button class="btn small secondary" data-next="#v2">Next Video →</button></div>
-        </article>
+    <section class="shell">
+      <!-- Player -->
+      <section class="card">
+        <div id="nowTitle" class="muted" style="margin:0 0 6px">Now playing</div>
+        <div class="embed"><video id="player" class="player"
+          controls controlslist="nodownload noplaybackrate"
+          disablepictureinpicture
+          preload="metadata" src=""></video></div>
 
-        <article id="v2" class="video">
-          <h2>Profile Settings</h2>
-          <div class="embed">
-            <video controls preload="metadata" src="AgentVideos/Profiles%20Settings.mp4"></video>
+        <div class="row">
+          <div class="pill"><span id="timeCur">0:00</span> / <span id="timeDur">0:00</span></div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button id="prevBtn" class="btn small secondary" type="button">← Previous</button>
+            <button id="nextBtn" class="btn small" type="button" disabled>Next Video →</button>
           </div>
-          <div class="nextwrap"><button class="btn small secondary" data-next="#v3">Next Video →</button></div>
-        </article>
+        </div>
 
-        <article id="v3" class="video">
-          <h2>Agent State</h2>
-          <div class="embed">
-            <video controls preload="metadata" src="AgentVideos/Agent%20State.mp4"></video>
-          </div>
-          <div class="nextwrap"><button class="btn small secondary" data-next="#v4">Next Video →</button></div>
-        </article>
-
-        <article id="v4" class="video">
-          <h2>Outbound Calling</h2>
-          <div class="embed">
-            <video controls preload="metadata" src="AgentVideos/Outbound%20Calling.mp4"></video>
-          </div>
-          <div class="nextwrap"><button class="btn small secondary" data-next="#v5">Next Video →</button></div>
-        </article>
-
-        <article id="v5" class="video">
-          <h2>Side Navigation</h2>
-          <div class="embed">
-            <video controls preload="metadata" src="AgentVideos/Side%20Navigation.mp4"></video>
-          </div>
-          <div class="nextwrap"><button class="btn small secondary" data-next="#v6">Next Video →</button></div>
-        </article>
-
-        <article id="v6" class="video">
-          <h2>Sign Out</h2>
-          <div class="embed">
-            <video controls preload="metadata" src="AgentVideos/Sign%20Out.mp4"></video>
-          </div>
-        </article>
+        <div class="row" style="margin-top:12px">
+          <div class="progress" style="width:100%"><div id="bigBar" class="bar"></div></div>
+          <div class="pill"><span id="overallPct">0</span>% complete</div>
+        </div>
       </section>
+
+      <!-- Checklist / Playlist -->
+      <aside class="card">
+        <h3 style="margin:0 0 10px">Playlist</h3>
+        <ul id="list" class="list" aria-label="Training playlist"></ul>
+      </aside>
     </section>
   </main>
 
   <script>
-    const AUTH_KEY="training_authed",NAME_KEY="training_visitor_name";
+    // --- config / data ---
+    const AUTH_KEY="training_authed", NAME_KEY="training_visitor_name";
+    const COMPLETION_WEBHOOK="https://script.google.com/macros/s/AKfycbyB23AOVKrraH3h23YR-QCrrl5pVO4qUWDX1tmp84htriq0xxKDqwA0wHCNK15rHAMh/exec";
+
+    const VIDEOS = [
+      { id:"v1", title:"Agent Login (Desktop)", src:"AgentVideos/Agent%20Login%20(Desktop).mp4" },
+      { id:"v2", title:"Profile Settings",      src:"AgentVideos/Profiles%20Settings.mp4" },
+      { id:"v3", title:"Agent State",           src:"AgentVideos/Agent%20State.mp4" },
+      { id:"v4", title:"Outbound Calling",      src:"AgentVideos/Outbound%20Calling.mp4" },
+      { id:"v5", title:"Side Navigation",       src:"AgentVideos/Side%20Navigation.mp4" },
+      { id:"v6", title:"Sign Out",              src:"AgentVideos/Sign%20Out.mp4" }
+    ];
+
+    // --- auth guard + name ---
     if(localStorage.getItem(AUTH_KEY)!=="true"){
       location.href=new URL("index.html",location.href).toString();
     }
-    document.getElementById("who").textContent=localStorage.getItem(NAME_KEY)||"guest";
+    const viewerName = localStorage.getItem(NAME_KEY) || "guest";
+    document.getElementById("who").textContent = viewerName;
+
+    // --- state & persistence ---
+    const STORAGE_KEY="training_progress_v1";
+    // progress schema: { index, per: [{watched: seconds, dur: seconds, done: bool}] }
+    let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    if(!progress){ progress = { index: 0, per: VIDEOS.map(()=>({watched:0,dur:0,done:false})) }; save(); }
+
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }
+
+    // --- ui refs ---
+    const player = document.getElementById("player");
+    const nowTitle = document.getElementById("nowTitle");
+    const timeCur = document.getElementById("timeCur");
+    const timeDur = document.getElementById("timeDur");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const overallPct = document.getElementById("overallPct");
+    const bigBar = document.getElementById("bigBar");
+    const listEl = document.getElementById("list");
     document.getElementById("logout").addEventListener("click",()=>{
-      localStorage.removeItem(AUTH_KEY);
-      localStorage.removeItem(NAME_KEY);
+      localStorage.removeItem(AUTH_KEY); localStorage.removeItem(NAME_KEY);
       location.href=new URL("index.html",location.href).toString();
     });
-    document.querySelectorAll("[data-next]").forEach(btn=>{
-      btn.addEventListener("click",()=>{
-        const target=document.querySelector(btn.dataset.next);
-        if(target){target.scrollIntoView({behavior:"smooth",block:"start"});}
+
+    // --- helpers ---
+    const fmt = s => {
+      s = Math.max(0, Math.floor(s||0));
+      const m = Math.floor(s/60), r = (s%60).toString().padStart(2,"0");
+      return `${m}:${r}`;
+    };
+    function updateOverall(){
+      const done = progress.per.filter(p=>p.done).length;
+      const pct = Math.round((done / VIDEOS.length) * 100);
+      overallPct.textContent = pct;
+      bigBar.style.width = pct + "%";
+      if(done === VIDEOS.length && !progress.completed){
+        progress.completed = new Date().toISOString(); save();
+        // completion webhook
+        try{
+          fetch(COMPLETION_WEBHOOK, {
+            method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({
+              type:"completion",
+              name: viewerName,
+              ts: progress.completed,
+              videos: VIDEOS.map((v,i)=>({ title:v.title, watched:progress.per[i].watched, duration:progress.per[i].dur, done:progress.per[i].done }))
+            })
+          });
+        }catch(_){}
+        alert("All videos completed. Great job!");
+      }
+    }
+    function renderList(){
+      listEl.innerHTML = "";
+      VIDEOS.forEach((v,i)=>{
+        const li = document.createElement("li");
+        li.className = "item" + (progress.per[i].done ? " done" : "");
+        li.setAttribute("data-i", i);
+        if(i === progress.index) li.setAttribute("aria-current","true");
+
+        const left = document.createElement("div");
+        left.innerHTML = `<div style="font-weight:700">${v.title}</div>
+          <div class="progress" style="margin-top:6px;width:160px"><div class="bar" style="width:${progress.per[i].dur? Math.min(100, Math.round(progress.per[i].watched/progress.per[i].dur*100)) : 0}%"></div></div>`;
+
+        const right = document.createElement("div");
+        right.innerHTML = progress.per[i].done ? `<span class="check">✓</span>` : `<span class="muted">${fmt(progress.per[i].watched)}</span>`;
+
+        li.append(left, right);
+        li.style.cursor = "pointer";
+        li.addEventListener("click", ()=>{
+          // can revisit completed ones; otherwise only current or earlier
+          if(progress.per[i].done || i <= progress.index) load(i);
+        });
+        listEl.appendChild(li);
       });
+      updateOverall();
+    }
+
+    // --- load & play with anti-skip ---
+    let maxAllowed = 0; // seconds allowed to seek to (grows as they watch)
+    function load(i){
+      progress.index = i; save();
+      const v = VIDEOS[i];
+      nowTitle.textContent = "Now playing — " + v.title;
+      player.src = v.src;
+      nextBtn.disabled = true;
+      prevBtn.disabled = (i === 0);
+      // reset allowed seek; we will restore from watched
+      maxAllowed = progress.per[i].watched || 0;
+      player.currentTime = maxAllowed;
+      player.play().catch(()=>{}); // autoplay may be blocked; user can press play
+      renderList();
+    }
+
+    // time + anti-seek handlers
+    player.addEventListener("loadedmetadata", ()=>{
+      const i = progress.index;
+      progress.per[i].dur = player.duration || progress.per[i].dur;
+      timeDur.textContent = fmt(progress.per[i].dur);
+      // allow resuming where they left off, but not beyond
+      const resumeAt = Math.min(progress.per[i].watched, player.duration - 1);
+      player.currentTime = resumeAt;
+      maxAllowed = resumeAt;
+      timeCur.textContent = fmt(player.currentTime);
     });
+
+    player.addEventListener("timeupdate", ()=>{
+      const i = progress.index;
+      const cur = player.currentTime || 0;
+      timeCur.textContent = fmt(cur);
+      // grow allowed window if they genuinely watched forward
+      if(cur > maxAllowed) maxAllowed = cur;
+      // record watched time as the max of what they've genuinely reached
+      progress.per[i].watched = Math.max(progress.per[i].watched, maxAllowed);
+      save();
+      renderList();
+    });
+
+    // prevent skipping ahead
+    player.addEventListener("seeking", ()=>{
+      const i = progress.index;
+      const target = player.currentTime || 0;
+      if(target > maxAllowed + 1){ // tiny grace
+        player.currentTime = maxAllowed;
+      }
+    });
+
+    player.addEventListener("ended", ()=>{
+      const i = progress.index;
+      const dur = progress.per[i].dur || player.duration || 0;
+      // consider completed if watched 98%+
+      if(maxAllowed >= 0.98 * dur){
+        progress.per[i].done = true; save();
+        renderList();
+        nextBtn.disabled = (i >= VIDEOS.length - 1);
+        // auto-advance after a moment if not last
+        if(i < VIDEOS.length - 1){
+          setTimeout(()=> load(i+1), 800);
+        } else {
+          updateOverall(); // triggers webhook if final
+        }
+      } else {
+        // they scrubbed back near the end; require last seconds
+        nextBtn.disabled = true;
+      }
+    });
+
+    // prev/next
+    nextBtn.addEventListener("click", ()=>{
+      const i = progress.index;
+      if(i < VIDEOS.length - 1) load(i+1);
+    });
+    prevBtn.addEventListener("click", ()=>{
+      const i = progress.index;
+      if(i > 0) load(i-1);
+    });
+
+    // enable Next only when current is marked done
+    setInterval(()=>{
+      const i = progress.index;
+      nextBtn.disabled = !progress.per[i].done || i >= VIDEOS.length - 1;
+    }, 400);
+
+    // kick things off
+    load(progress.index);
   </script>
 </body>
 </html>
