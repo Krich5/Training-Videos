@@ -130,8 +130,8 @@
     };
     const VIDEOS = COURSES[COURSE_KEY] || COURSES.agent;
 
-    // --- webhook (completion) ---
-    const COMPLETION_WEBHOOK="https://script.google.com/macros/s/AKfycbyB23AOVKrraH3h23YR-QCrrl5pVO4qUWDX1tmp84htriq0xxKDqwA0wHCNK15rHAMh/exec";
+    // --- New webhook URL (completion) ---
+    const COMPLETION_WEBHOOK="https://script.google.com/macros/s/AKfycbxTv054rCXx409lO9x-uUeqm1qtgcLeLWTiY8lWrYq-740bgp2M6gbDV0_ucZRDegA9/exec";
 
     // --- UI refs ---
     const player = document.getElementById("player");
@@ -318,8 +318,9 @@
     }, 400);
 
     // init
-    if (!VIDEOS.length){
-      // show empty state
+    const playerEl = document.getElementById("player"); // just to ensure DOM attached
+    const VIDEOS_PRESENT = VIDEOS.length > 0;
+    if (!VIDEOS_PRESENT){
       renderList();
       nowTitle.textContent = "No videos to play";
       nextBtn.disabled = prevBtn.disabled = restartBtn.disabled = true;
