@@ -30,8 +30,25 @@ label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px} input{wi
 .err{margin-top:12px;text-align:center;color:#f87171;font-weight:700}
 footer{margin:28px 0;text-align:center;color:var(--muted)}
 </style>
-<script src="config.js?v=31"></script>
+
+<!-- Try to load external config -->
+<script src="config.js?v=1001"></script>
+
+<!-- Fallback config if the above fails or is stale -->
 <script>
+(function ensureConfig(){
+  const FALLBACK_URL = "https://script.google.com/macros/s/AKfycbzANcSixCAEfvqcj7fOfAQn7TaHkeYcOh3msNSeuwkK2eKwdLTqgQ0U9jCJXSyrswJW/exec"; // <- fixed "https://"
+  if (!window.APP_CONFIG || !window.APP_CONFIG.SCRIPT_URL) {
+    window.APP_CONFIG = {
+      SCRIPT_URL: FALLBACK_URL,
+      ADMIN_TOKEN: "CXASTrainingPortal25",
+      ADMIN_PASS:  "cooladmin",
+      BRAND:       "Training Portal",
+      TIMEZONE:    "America/New_York"
+    };
+    console.warn("Using FALLBACK APP_CONFIG (config.js missing or stale).");
+  }
+})();
 (function themeBoot(){
   const saved = localStorage.getItem('tp_theme');
   if(saved) document.documentElement.setAttribute('data-theme', saved);
@@ -67,15 +84,16 @@ footer{margin:28px 0;text-align:center;color:var(--muted)}
 <script>
 const cfg = window.APP_CONFIG;
 document.getElementById('brand').textContent = cfg.BRAND || 'Training Portal';
-document.getElementById('themeBtn').addEventListener('click', ()=>{
+
+const themeBtn = document.getElementById('themeBtn');
+themeBtn.textContent = (document.documentElement.getAttribute('data-theme')||'dark')==='dark'?'Dark':'Light';
+themeBtn.addEventListener('click', ()=>{
   const cur = document.documentElement.getAttribute('data-theme') || 'dark';
   const nxt = cur==='dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', nxt);
   localStorage.setItem('tp_theme', nxt);
-  document.getElementById('themeBtn').textContent = nxt==='dark'?'Dark':'Light';
+  themeBtn.textContent = nxt==='dark'?'Dark':'Light';
 });
-document.getElementById('themeBtn').textContent =
-  (document.documentElement.getAttribute('data-theme')||'dark')==='dark'?'Dark':'Light';
 
 const $ = id => document.getElementById(id);
 const msg = $('msg');
@@ -96,20 +114,13 @@ $('enterBtn').addEventListener('click', async ()=>{
     let data; try{ data = JSON.parse(text); }catch{ data=null; }
     if(!res.ok || !data || data.ok!==true){ msg.textContent = (data && data.error) || 'Server error. Please try again.'; return; }
 
-    // log signin (best effort)
-    try{
-      await fetch(cfg.SCRIPT_URL, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          mode:'signin', name, course:data.course, company:data.company,
-          ts_client: Date.now(), page:'home', ua: navigator.userAgent
-        })
-      });
-    }catch{}
+    // best-effort signin log
+    fetch(cfg.SCRIPT_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ mode:'signin', name, course:data.course, company:data.company, ts_client: Date.now(), page:'home', ua:navigator.userAgent })
+    }).catch(()=>{});
 
-    sessionStorage.setItem('tp_user', JSON.stringify({
-      name, course:data.course, company:data.company, started: Date.now()
-    }));
+    sessionStorage.setItem('tp_user', JSON.stringify({ name, course:data.course, company:data.company, started: Date.now() }));
     location.href = 'videos.html';
   }catch(e){
     msg.textContent = 'Network error. Please try again.';
