@@ -37,14 +37,14 @@
       <div class="left">
         <a class="btnLink" href="admin.html">Admin</a>
       </div>
-      <div class="center"><div class="brand">Training Portal</div></div>
+      <div class="center"><div class="brand">CXAS Training Portal</div></div>
       <div class="right"><img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo" /></div>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <h1>Training Series</h1>
+      <h1>Training Portal</h1>
       <p class="lead">Enter your name and your 10-character access code.</p>
 
       <form id="gateForm" novalidate>
@@ -62,7 +62,7 @@
 
   <script>
   // === CONFIG ===
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwawMz0Vgg4PSp7sZ0cWCYkEWtEL_fDunaimL5MbmjxC05QIshFdmPcedH0y6Gctu_V/exec";
+  const SCRIPT_URL = "YOUR_SCRIPT_URL"; // <- keep your working URL here
   document.getElementById("yr").textContent=new Date().getFullYear();
 
   document.getElementById("gateForm").addEventListener("submit", async (e) => {
@@ -78,7 +78,7 @@
     }
 
     try {
-      // Try standard CORS first
+      // Try standard CORS first (if your Apps Script happens to allow it)
       let data = null;
       try {
         const res = await fetch(SCRIPT_URL, {
@@ -90,19 +90,18 @@
         const raw = await res.text();
         try { data = JSON.parse(raw); } catch {}
       } catch (e) {
-        console.warn("CORS blocked, falling back to no-cors", e);
+        // fall through to no-cors
       }
 
-      // If still no data, retry in no-cors mode (Apps Script safe)
+      // Fallback to no-cors (Apps Script friendly)
       if (!data) {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({ mode: "validate", code })
-        });
-        // We can't read response in no-cors; optimistic redirect
+        // We can’t read response in no-cors; optimistically set session + go
         sessionStorage.setItem('tp_user', JSON.stringify({ name, course:"agent", company:"" }));
+        // Best-effort sign-in log
+        fetch(SCRIPT_URL, {
+          method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({ mode:"signin", name, course:"agent", company:"", ts_client:new Date().toISOString(), ua:navigator.userAgent, page:"index" })
+        });
         location.href = "videos.html";
         return;
       }
@@ -114,25 +113,16 @@
 
       const course  = data.course;
       const company = data.company || "";
-
       sessionStorage.setItem('tp_user', JSON.stringify({ name, course, company }));
 
       // Log sign-in (fire-and-forget)
       fetch(SCRIPT_URL, {
-        method:"POST",
-        mode:"no-cors",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-          mode:"signin", name, course, company,
-          ts_client:new Date().toISOString(),
-          ua:navigator.userAgent,
-          page:"index"
-        })
+        method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ mode:"signin", name, course, company, ts_client:new Date().toISOString(), ua:navigator.userAgent, page:"index" })
       });
 
       location.href = "videos.html";
     } catch (err) {
-      console.error(err);
       errorEl.textContent = "Server error. Please try again.";
     }
   });
