@@ -1,6 +1,6 @@
 :root { font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
-body { margin: 0; background: #f6f7f9; }
-.card { max-width: 720px; margin: 6rem auto; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+body { margin: 0; background: #fff; }        /* no grey banner */
+.card { max-width: 720px; margin: 2rem auto; background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
 label { display: block; margin: 0 0 1rem; font-weight: 600; }
 input { display: block; width: 100%; margin-top: .25rem; padding: .6rem .75rem; border: 1px solid #d0d6dd; border-radius: 8px; }
 button { padding: .6rem 1rem; border: 0; border-radius: 8px; background: black; color: white; font-weight: 700; cursor: pointer; }
