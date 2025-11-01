@@ -6,97 +6,111 @@
   <title>Training Videos</title>
   <meta name="color-scheme" content="dark">
   <style>
-    /* === API_UI theme === */
     :root{
       --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
       --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08);
     }
     *,*::before,*::after{box-sizing:border-box}
-    body{margin:0;font-family: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
-         background:linear-gradient(180deg,var(--bg),var(--bg2)); color:var(--fg)}
-    a{color:#7dd3fc;text-decoration:none} a:hover{text-decoration:underline}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+         background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--fg)}
+    a{color:#7dd3fc;text-decoration:none}a:hover{text-decoration:underline}
 
     header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
     .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
     .brand{font-weight:800;letter-spacing:.2px}
     .logo{height:36px}
 
-    .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB)); border:none; color:#06111d;
-         font-weight:800; padding:10px 18px; border-radius:12px; cursor:pointer}
-    .btn.secondary{background:#0e1525; color:var(--fg); border:1px solid var(--border)}
+    .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;
+         font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer}
+    .btn.secondary{background:#0e1525;color:var(--fg);border:1px solid var(--border)}
+    .btn.small{padding:8px 14px;font-size:.9rem}
     .btn:active{transform:translateY(1px)}
 
     main{max-width:1000px;margin:28px auto;padding:0 16px}
-    .card{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.25);}
-    h1{margin:.1rem 0 .6rem; font-size:1.6rem}
-    .lead{color:var(--muted); margin-top:0}
-
-    .videos{display:grid; grid-template-columns:1fr; gap:22px; margin-top:14px}
-    .video h2{margin:.2rem 0 .6rem; font-size:1.1rem}
-    .embed{position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:14px; background:#000; border:1px solid var(--border)}
-    .embed video, .embed iframe{position:absolute; top:0; left:0; width:100%; height:100%; border:0; background:#000}
-    .toprow{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;
+          box-shadow:0 10px 30px rgba(0,0,0,.25);}
+    h1{margin:.1rem 0 .6rem;font-size:1.6rem}
+    .lead{color:var(--muted);margin-top:0}
+    .videos{display:grid;grid-template-columns:1fr;gap:22px;margin-top:14px}
+    .video h2{margin:.2rem 0 .6rem;font-size:1.1rem}
+    .embed{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:14px;
+           background:#000;border:1px solid var(--border)}
+    .embed video{position:absolute;top:0;left:0;width:100%;height:100%;border:0;background:#000}
+    .nextwrap{text-align:right;margin-top:10px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
       <div class="brand">Training Portal</div>
-      <div style="display:flex; gap:10px; align-items:center">
+      <div style="display:flex;gap:10px;align-items:center">
         <button id="contact" class="btn secondary" type="button">Contact</button>
         <button id="logout" class="btn" type="button">Log out</button>
-        <!-- repo logo -->
-        <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo" />
+        <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo"/>
       </div>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <div class="toprow">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
         <h1>Training Videos</h1>
         <p class="lead">Welcome, <strong id="who"></strong>.</p>
       </div>
 
       <section class="videos">
-        <!-- Videos served from /AgentVideos in this repo (spaces & () URL-encoded) -->
-        <article class="video">
-          <h2>Agent login</h2>
+        <article id="v1" class="video">
+          <h2>Agent Login (Desktop)</h2>
           <div class="embed">
             <video controls preload="metadata" src="AgentVideos/Agent%20Login%20(Desktop).mp4"></video>
           </div>
+          <div class="nextwrap">
+            <button class="btn small secondary" data-next="#v2">Next Video →</button>
+          </div>
         </article>
 
-        <article class="video">
-          <h2>Profile settings</h2>
+        <article id="v2" class="video">
+          <h2>Profile Settings</h2>
           <div class="embed">
             <video controls preload="metadata" src="AgentVideos/Profiles%20Settings.mp4"></video>
           </div>
+          <div class="nextwrap">
+            <button class="btn small secondary" data-next="#v3">Next Video →</button>
+          </div>
         </article>
 
-        <article class="video">
-          <h2>Agent state</h2>
+        <article id="v3" class="video">
+          <h2>Agent State</h2>
           <div class="embed">
             <video controls preload="metadata" src="AgentVideos/Agent%20State.mp4"></video>
           </div>
+          <div class="nextwrap">
+            <button class="btn small secondary" data-next="#v4">Next Video →</button>
+          </div>
         </article>
 
-        <article class="video">
-          <h2>Outbound calling</h2>
+        <article id="v4" class="video">
+          <h2>Outbound Calling</h2>
           <div class="embed">
             <video controls preload="metadata" src="AgentVideos/Outbound%20Calling.mp4"></video>
           </div>
-        </article>
-
-        <article class="video">
-          <h2>Side navigation</h2>
-          <div class="embed">
-            <video controls preload="metadata" src="AgentVideos/Side%20Navigation.mp4"></video>
+          <div class="nextwrap">
+            <button class="btn small secondary" data-next="#v5">Next Video →</button>
           </div>
         </article>
 
-        <article class="video">
-          <h2>Sign out</h2>
+        <article id="v5" class="video">
+          <h2>Side Navigation</h2>
+          <div class="embed">
+            <video controls preload="metadata" src="AgentVideos/Side%20Navigation.mp4"></video>
+          </div>
+          <div class="nextwrap">
+            <button class="btn small secondary" data-next="#v6">Next Video →</button>
+          </div>
+        </article>
+
+        <article id="v6" class="video">
+          <h2>Sign Out</h2>
           <div class="embed">
             <video controls preload="metadata" src="AgentVideos/Sign%20Out.mp4"></video>
           </div>
@@ -106,32 +120,28 @@
   </main>
 
   <script>
-    // Auth via localStorage (mobile-reliable)
-    const AUTH_KEY = "training_authed";
-    const NAME_KEY = "training_visitor_name";
-
-    function isAuthed(){ return localStorage.getItem(AUTH_KEY) === "true"; }
-    function requireAuthOrRedirect(){
-      if(!isAuthed()){
-        location.href = new URL("index.html", location.href).toString();
-      }
+    // --- auth guard ---
+    const AUTH_KEY="training_authed", NAME_KEY="training_visitor_name";
+    if(localStorage.getItem(AUTH_KEY)!=="true"){
+      location.href=new URL("index.html",location.href).toString();
     }
+    document.getElementById("who").textContent=localStorage.getItem(NAME_KEY)||"guest";
 
-    // Guard + personalize
-    requireAuthOrRedirect();
-    document.getElementById('who').textContent = localStorage.getItem(NAME_KEY) || "guest";
-
-    // Contact button -> email
-    const EMAIL_OWNER = "Kenley.richardson@gmail.com";
-    document.getElementById('contact').addEventListener('click', () => {
-      location.href = `mailto:${encodeURIComponent(EMAIL_OWNER)}?subject=${encodeURIComponent('Question about training videos')}`;
+    // contact + logout
+    const EMAIL_OWNER="Kenley.richardson@gmail.com";
+    document.getElementById("contact").addEventListener("click",()=>location.href=
+      `mailto:${encodeURIComponent(EMAIL_OWNER)}?subject=${encodeURIComponent("Question about training videos")}`);
+    document.getElementById("logout").addEventListener("click",()=>{
+      localStorage.removeItem(AUTH_KEY);localStorage.removeItem(NAME_KEY);
+      location.href=new URL("index.html",location.href).toString();
     });
 
-    // Logout
-    document.getElementById('logout').addEventListener('click', () => {
-      localStorage.removeItem(AUTH_KEY);
-      localStorage.removeItem(NAME_KEY);
-      location.href = new URL("index.html", location.href).toString();
+    // smooth "Next Video" scroll
+    document.querySelectorAll("[data-next]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const target=document.querySelector(btn.dataset.next);
+        if(target){ target.scrollIntoView({behavior:"smooth",block:"start"}); }
+      });
     });
   </script>
 </body>
