@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Training Portal</title>
+  <meta name="color-scheme" content="dark">
+  <style>
+    :root{
+      --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
+      --accentA:#22d3ee; --accentB:#3b82f6; --border:rgba(255,255,255,.08);
+      --input:#0e1525;
+    }
+    :root[data-theme="light"]{
+      --bg:#f5f7fb; --card:#ffffff; --muted:#5f6b7a; --fg:#0d1321;
+      --accentA:#60a5fa; --accentB:#22d3ee; --border:rgba(0,0,0,.12);
+      --input:#f3f6fb;
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";background:var(--bg);color:var(--fg);min-height:100vh}
+
+    header{padding:14px 18px;border-bottom:1px solid var(--border)}
+    .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+    .left{justify-self:start}
+    .center{justify-self:center;text-align:center}
+    .right{justify-self:end;display:flex;gap:10px;align-items:center}
+
+    .brand{font-weight:800;letter-spacing:.2px}
+    .logo{height:36px}
+    .btnLink{background:var(--input);color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
+    .toggle{border:1px solid var(--border);background:var(--input);color:var(--fg);border-radius:999px;padding:6px 12px;font-weight:700;cursor:pointer}
+
+    main{max-width:900px;margin:40px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.12)}
+    h1{margin:0 0 12px 0;text-align:center}
+    p.sub{margin:0 0 18px 0;color:var(--muted);text-align:center}
+    label{display:block;margin:10px 0 6px 6px;color:var(--muted);font-size:14px}
+    input{width:100%;border-radius:12px;border:1px solid var(--border);background:var(--input);color:var(--fg);padding:12px;outline:none}
+    .btn{display:block;margin:18px auto 0 auto;background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:12px 18px;border-radius:12px;cursor:pointer}
+    .err{margin-top:12px;color:#f87171;text-align:center;font-weight:700}
+    footer{margin:30px 0;color:var(--muted);text-align:center;font-size:13px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="left"><a class="btnLink" href="admin.html">Admin</a></div>
+      <div class="center"><div class="brand">Training Portal</div></div>
+      <div class="right">
+        <button id="themeBtn" class="toggle" title="Toggle theme">Dark</button>
+        <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo"/>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h1>Training Series</h1>
+      <p class="sub">Enter your name and your 10-character access code.</p>
+
+      <label>Your name</label>
+      <input id="name" placeholder="Jane Doe" autocomplete="off">
+
+      <label>Access code</label>
+      <input id="code" placeholder="XXXXXXXXXX" maxlength="10" autocomplete="off" style="text-transform:uppercase">
+
+      <button id="go" class="btn">Enter</button>
+      <div id="msg" class="err"></div>
+    </div>
+    <footer>© 2025 Training</footer>
+  </main>
+
+  <script src="config.js"></script>
+  <script>
+    // Theme toggle
+    const root=document.documentElement, themeBtn=document.getElementById('themeBtn');
+    function applyTheme(t){ root.setAttribute('data-theme',t); themeBtn.textContent=(t==='light'?'Light':'Dark');}
+    applyTheme(localStorage.getItem('tv_theme')||'dark');
+    themeBtn.addEventListener('click',()=>{ const n=(root.getAttribute('data-theme')==='light')?'dark':'light'; applyTheme(n); localStorage.setItem('tv_theme',n); });
+
+    const { SCRIPT_URL } = window.APP_CONFIG || {};
+    const nameEl=document.getElementById('name'), codeEl=document.getElementById('code'), go=document.getElementById('go'), msg=document.getElementById('msg');
+
+    go.addEventListener('click', async ()=>{
+      msg.textContent='';
+      const name=nameEl.value.trim();
+      const code=codeEl.value.trim().toUpperCase();
+      if(!name||code.length!==10){ msg.textContent='Please enter your name and a 10-character code.'; return; }
+
+      try{
+        const res=await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'validate', code})});
+        const text=await res.text(); let data; try{data=JSON.parse(text);}catch{}
+        if(!res.ok||!data||data.ok!==true){ msg.textContent=(text==='UNAUTHORIZED'?'Server unauthorized.':'Unknown mode'); return; }
+
+        // Log signin
+        try{
+          await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({mode:'signin', name, course:data.course, company:data.company, page:'index', ua:navigator.userAgent, ts_client: Date.now()})});
+        }catch(_){}
+
+        // Go to videos with context
+        const params=new URLSearchParams({ n:name, c:data.course, co:data.company });
+        location.href='videos.html?'+params.toString();
+      }catch(e){ msg.textContent='Server error. Please try again.'; }
+    });
+  </script>
+</body>
+</html>
