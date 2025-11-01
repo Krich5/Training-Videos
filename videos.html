@@ -1,85 +1,65 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Training Videos</title>
-<meta name="color-scheme" content="dark light">
+<meta name="color-scheme" content="dark">
 <style>
-:root{
-  --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
-  --input:#0e1525; --border:rgba(255,255,255,.08); --accentA:#22d3ee; --accentB:#3b82f6;
-}
-:root[data-theme="light"]{ --bg:#f6f7fb; --bg2:#eef2f8; --card:#ffffff; --fg:#0f172a; --input:#f3f4f6; --border:rgba(15,23,42,.12); --muted:#64748b; }
-*{box-sizing:border-box} body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
-background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--fg);min-height:100vh;}
-header{padding:14px 18px;border-bottom:1px solid var(--border)}
-.hgrid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
-.left{justify-self:start}.center{justify-self:center}.right{justify-self:end}
-.brand{font-weight:800;letter-spacing:.2px}
-.btnLink{background:var(--input);color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
-.toggle{border:1px solid var(--border);background:var(--input);padding:6px 10px;border-radius:999px;cursor:pointer}
-main{max-width:1100px;margin:24px auto;padding:0 16px}
-.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-h2{margin:6px 0 12px 0}
-.video{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px}
-li{list-style:none;margin:0;padding:0}
-.item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--input);margin-bottom:8px;cursor:pointer}
-.item.active{outline:2px solid var(--accentB)}
-.badge{font-size:.8rem;color:var(--muted)}
+  :root {
+    --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --input:#0e1525;
+    --border:rgba(255,255,255,.08); --accentA:#22d3ee; --accentB:#3b82f6;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:ui-sans-serif,system-ui;background:#0b1020;color:#e9edf5;min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .btnLink{background:var(--input);color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
+  .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  h1,h2{margin:6px 0 12px 0}
+  .muted{color:var(--muted)}
+  video{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px}
+  ul{list-style:none;margin:0;padding:0}
+  .item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--input);margin-bottom:8px;cursor:pointer}
+  .item.active{outline:2px solid var(--accentB)}
+  .badge{font-size:.8rem;color:var(--muted)}
+  .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:8px 14px;border-radius:10px;cursor:pointer}
 </style>
-<script src="config.js?v=31"></script>
-<script>
-(function themeBoot(){
-  const saved = localStorage.getItem('tp_theme');
-  if(saved) document.documentElement.setAttribute('data-theme', saved);
-})();
-</script>
 </head>
 <body>
-<header>
-  <div class="hgrid">
-    <div class="left"><a class="btnLink" href="home.html">← Back</a></div>
-    <div class="center"><div class="brand">Training Videos</div></div>
-    <div class="right">
-      <button id="themeBtn" class="toggle">Dark</button>
-      <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="Logo" style="height:36px;margin-left:8px">
+  <header>
+    <a class="btnLink" href="home.html">← Back</a>
+    <div style="font-weight:800">Training Videos</div>
+    <div></div>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <h2 id="courseTitle" class="muted">Loading…</h2>
+        <video id="player" controls playsinline></video>
+      </section>
+      <aside class="card">
+        <h2>Playlist</h2>
+        <ul id="list"></ul>
+        <div id="status" class="muted"></div>
+      </aside>
     </div>
   </div>
-</header>
-
-<main>
-  <div class="grid">
-    <section class="card">
-      <h2 id="courseTitle"></h2>
-      <video id="player" class="video" controls playsinline></video>
-    </section>
-    <section class="card">
-      <h2>Playlist</h2>
-      <ul id="list" style="margin:0;padding:0"></ul>
-    </section>
-  </div>
-</main>
 
 <script>
-const cfg = window.APP_CONFIG;
-document.getElementById('themeBtn').addEventListener('click', ()=>{
-  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
-  const nxt = cur==='dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', nxt);
-  localStorage.setItem('tp_theme', nxt);
-  document.getElementById('themeBtn').textContent = nxt==='dark'?'Dark':'Light';
-});
-document.getElementById('themeBtn').textContent =
-  (document.documentElement.getAttribute('data-theme')||'dark')==='dark'?'Dark':'Light';
+/* ====== SET YOUR BACKEND URL ====== */
+const SCRIPT_URL = "YOUR_EXEC_URL_HERE";
 
+/* ====== USER CONTEXT (set in home.html) ====== */
 const user = (()=>{ try{ return JSON.parse(sessionStorage.getItem('tp_user')||'null'); }catch{ return null; }})();
-if(!user) { location.href='home.html'; }
+if(!user){ location.href='home.html'; }
 
-/* Define course playlists (adjust paths/names as in your repo) */
+/* ====== PLAYLISTS ======
+   Update paths/titles to match your repo files exactly. */
 function playlistFor(course){
-  if(course==='agent'){
+  if(course === 'agent'){
     return [
       { title:'Agent login',         src:'AgentVideos/Agent%20Login%20(Desktop).mp4' },
       { title:'Profile settings',    src:'AgentVideos/Profiles%20Settings.mp4' },
@@ -89,12 +69,14 @@ function playlistFor(course){
       { title:'Sign out',            src:'AgentVideos/Sign%20Out.mp4' }
     ];
   }
-  if(course==='supervisor'){
+  if(course === 'supervisor'){
+    // Example placeholder—replace with your real supervisor videos
     return [
       { title:'Supervisor intro', src:'SupVideos/IMG_3339.mov' }
     ];
   }
-  if(course==='admin'){
+  if(course === 'admin'){
+    // Example placeholder—replace with your real admin videos
     return [
       { title:'Admin intro', src:'AdminVideos/intro.mp4' }
     ];
@@ -102,55 +84,89 @@ function playlistFor(course){
   return [];
 }
 
-const vids = playlistFor(user.course);
-const list = document.getElementById('list');
-const player = document.getElementById('player');
+/* ====== UI HOOKS ====== */
+const listEl   = document.getElementById('list');
+const statusEl = document.getElementById('status');
+const player   = document.getElementById('player');
 const courseTitle = document.getElementById('courseTitle');
-courseTitle.textContent = `${user.company} — ${user.course.charAt(0).toUpperCase()+user.course.slice(1)} Training`;
 
-let idx = 0, finished = new Array(vids.length).fill(false), jumping = false;
+/* ====== STATE ====== */
+const vids = playlistFor(user.course);
+let idx = 0;
+let finished = new Array(vids.length).fill(false);
+let jumping = false; // guard against mobile "ended" quirk
 
+courseTitle.textContent = `${user.company} — ${user.course[0].toUpperCase()+user.course.slice(1)} Training`;
+
+/* ====== RENDER LIST ====== */
 function renderList(){
-  list.innerHTML = vids.map((v,i)=>`
+  listEl.innerHTML = vids.map((v,i)=>`
     <li class="item ${i===idx?'active':''}" data-i="${i}">
       <span>${i+1}. ${v.title}</span>
-      <span class="badge">${finished[i]?'done':''}</span>
+      <span class="badge">${finished[i] ? 'done' : ''}</span>
     </li>`).join('');
-  list.querySelectorAll('.item').forEach(el=>{
+  listEl.querySelectorAll('.item').forEach(el=>{
     el.addEventListener('click', ()=>{
       const i = Number(el.getAttribute('data-i'));
-      if(i===idx) { player.currentTime = 0; player.play(); return; }
+      if (i === idx){ player.currentTime = 0; player.play(); return; }
       idx = i; loadCurrent(true);
     });
   });
+  const doneCount = finished.filter(Boolean).length;
+  statusEl.textContent = `${doneCount}/${vids.length} completed`;
 }
+
+/* ====== LOAD CURRENT VIDEO ====== */
 function loadCurrent(autoplay){
   jumping = true;
   player.src = vids[idx].src;
   player.currentTime = 0;
-  if(autoplay) player.play();
+  if (autoplay) player.play();
   renderList();
-  setTimeout(()=> jumping=false, 200); // guard against spurious "ended" on some mobiles
+  setTimeout(()=> jumping=false, 200);
 }
+
+/* ====== ON END: advance, and when all finished, log completion ====== */
 player.addEventListener('ended', ()=>{
-  if(jumping) return;
+  if (jumping) return; // ignore spurious ended on mobile seeks
   finished[idx] = true;
   const allDone = finished.every(Boolean);
-  if(allDone){
-    // send completion once
+
+  if (allDone){
     const videos_json = vids.map((v,i)=>({ index:i, title:v.title, src:v.src }));
-    fetch(cfg.SCRIPT_URL, {
+    // Best-effort POST; we don't block the UI on failure
+    fetch(SCRIPT_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        mode:'completion', name:user.name, course:user.course, company:user.company,
-        ts_client: Date.now(), page:'videos', ua:navigator.userAgent, videos_json
+        mode:'completion',
+        name:user.name,
+        course:user.course,
+        company:user.company,
+        ts_client: Date.now(),
+        page:'videos',
+        ua: navigator.userAgent,
+        videos_json
       })
     }).catch(()=>{});
   }
-  if(idx < vids.length-1){ idx++; loadCurrent(true); }
+
+  // Move to the next video (if any)
+  if (idx < vids.length - 1){
+    idx++;
+    loadCurrent(true);
+  } else {
+    renderList();
+  }
 });
-loadCurrent(false);
-renderList();
+
+/* ====== BOOT ====== */
+if (!vids.length){
+  courseTitle.textContent = `${user.company} — ${user.course} Training`;
+  statusEl.textContent = 'No videos assigned for this course yet.';
+} else {
+  loadCurrent(false);
+  renderList();
+}
 </script>
 </body>
 </html>
