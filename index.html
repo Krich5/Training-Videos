@@ -6,45 +6,36 @@
   <title>Training Access</title>
   <meta name="color-scheme" content="dark">
   <style>
-    /* === API_UI theme === */
     :root{
       --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
       --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08);
     }
     *,*::before,*::after{box-sizing:border-box}
-    body{margin:0;font-family: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
-         background:linear-gradient(180deg,var(--bg),var(--bg2)); color:var(--fg)}
-    a{color:#7dd3fc;text-decoration:none} a:hover{text-decoration:underline}
-
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+         background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--fg)}
     header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
     .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
     .brand{font-weight:800;letter-spacing:.2px}
     .logo{height:36px}
-
     main{max-width:820px;margin:28px auto;padding:0 16px}
-    .card{background:var(--card); border:1px solid var(--border); border-radius:18px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.25);}
-    h1{margin:0 0 .35rem; font-size:1.6rem}
-    .lead{color:var(--muted); margin:0 0 1rem}
-
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+    h1{margin:0 0 .35rem;font-size:1.6rem}
+    .lead{color:var(--muted);margin:0 0 1rem}
     label{display:block;font-size:13px;color:var(--muted);margin:8px 0 6px}
-    input{width:100%; border-radius:12px; border:1px solid var(--border);
-          background:var(--input); color:var(--fg); padding:10px 12px; outline:none; font-size:14px}
+    input{width:100%;border-radius:12px;border:1px solid var(--border);background:var(--input);
+          color:var(--fg);padding:10px 12px;outline:none;font-size:14px}
     input:focus{box-shadow:0 0 0 3px rgba(59,130,246,.25)}
-
-    .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB)); border:none; color:#06111d;
-         font-weight:800; padding:10px 18px; border-radius:12px; cursor:pointer; margin-top:12px}
+    .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;
+         font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer;margin-top:12px}
     .btn:active{transform:translateY(1px)}
-    .error{color:#f87171; font-weight:700; margin-top:.75rem}
-    .muted{color:var(--muted); margin-top:.6rem}
-
-    footer{color:#93a3ba; text-align:center; font-size:.85rem; padding:18px}
+    .error{color:#f87171;font-weight:700;margin-top:.75rem}
+    footer{color:#93a3ba;text-align:center;font-size:.85rem;padding:18px}
   </style>
 </head>
 <body>
   <header>
     <div class="wrap">
       <div class="brand">Training Portal</div>
-      <!-- repo logo (file lives at repo root) -->
       <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo" />
     </div>
   </header>
@@ -57,13 +48,10 @@
       <form id="gateForm" novalidate>
         <label for="name">Your name</label>
         <input id="name" name="name" type="text" placeholder="Jane Doe" required />
-
         <label for="password">Password</label>
         <input id="password" name="password" type="password" placeholder="••••••••" required />
-
         <button class="btn" type="submit">Enter</button>
         <p id="error" class="error" role="alert" aria-live="polite"></p>
-        <p class="muted" id="help"></p>
       </form>
     </section>
   </main>
@@ -71,53 +59,26 @@
   <footer>© <span id="yr"></span> Training</footer>
 
   <script>
-  // --- Config ---
-  const PASSWORD_PLAIN = "cooldemo";
-  const EMAIL_OWNER = "Kenley.richardson@gmail.com";
-  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyB23AOVKrraH3h23YR-QCrrl5pVO4qUWDX1tmp84htriq0xxKDqwA0wHCNK15rHAMh/exec";
+  const PASSWORD_PLAIN="cooldemo";
+  const WEBHOOK_URL="https://script.google.com/macros/s/AKfycbyB23AOVKrraH3h23YR-QCrrl5pVO4qUWDX1tmp84htriq0xxKDqwA0wHCNK15rHAMh/exec";
+  document.getElementById("yr").textContent=new Date().getFullYear();
 
-  // Theme bits
-  document.getElementById('yr').textContent = new Date().getFullYear();
-  document.getElementById('help').innerHTML =
-    `Need help? <a href="mailto:${encodeURIComponent(EMAIL_OWNER)}?subject=${encodeURIComponent('Training access help')}">Email ${EMAIL_OWNER}</a>`;
-
-  // Use localStorage (mobile-friendly)
-  const AUTH_KEY = "training_authed";
-  const NAME_KEY = "training_visitor_name";
-
-  const form = document.getElementById('gateForm');
-  const nameInput = document.getElementById('name');
-  const passInput = document.getElementById('password');
-  const errorEl = document.getElementById('error');
-
-  form.addEventListener('submit', (e) => {
+  const AUTH_KEY="training_authed",NAME_KEY="training_visitor_name";
+  const form=document.getElementById("gateForm");
+  form.addEventListener("submit",e=>{
     e.preventDefault();
-    errorEl.textContent = "";
-
-    const name = nameInput.value.trim();
-    const pass = passInput.value;
-
-    if (!name || !pass) { errorEl.textContent = "Please fill out both fields."; return; }
-
-    if (pass === PASSWORD_PLAIN) {
-      localStorage.setItem(AUTH_KEY, "true");
-      localStorage.setItem(NAME_KEY, name);
-
-      // fire-and-forget webhook
-      try {
-        fetch(WEBHOOK_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, ts: new Date().toISOString(), ua: navigator.userAgent, page: location.href })
-        });
-      } catch (_) {}
-
-      // same-folder redirect
-      location.href = new URL("videos.html", location.href).toString();
-    } else {
-      errorEl.textContent = "Incorrect password. Please try again.";
-    }
+    const name=document.getElementById("name").value.trim();
+    const pass=document.getElementById("password").value;
+    const errorEl=document.getElementById("error");
+    errorEl.textContent="";
+    if(!name||!pass){errorEl.textContent="Please fill out both fields.";return;}
+    if(pass===PASSWORD_PLAIN){
+      localStorage.setItem(AUTH_KEY,"true");
+      localStorage.setItem(NAME_KEY,name);
+      try{fetch(WEBHOOK_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({name,ts:new Date().toISOString(),ua:navigator.userAgent,page:location.href})});}catch(_){}
+      location.href=new URL("videos.html",location.href).toString();
+    }else{errorEl.textContent="Incorrect password. Please try again.";}
   });
   </script>
 </body>
