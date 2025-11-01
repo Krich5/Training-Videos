@@ -6,7 +6,7 @@
   <title>Training Videos</title>
   <meta name="color-scheme" content="dark">
   <style>
-    :root{ --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --accentA:#22d3ee; --accentB:#3b82f6; --border:rgba(255,255,255,.08);}
+    :root{--bg:#0b1020;--card:#131a2a;--muted:#92a0b8;--fg:#e9edf5;--accentA:#22d3ee;--accentB:#3b82f6;--border:rgba(255,255,255,.08);}
     *,*::before,*::after{box-sizing:border-box}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";background:var(--bg);color:var(--fg);min-height:100vh}
     header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -59,28 +59,19 @@
     </section>
   </main>
 
+  <!-- Config -->
+  <script src="config.js"></script>
   <script>
-  // ===== set this to your current Apps Script /exec URL =====
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxuPTsJ2ZNV2PLmTFEmYQsHza7P4mFOgnfNFgjGz-3NFgwa1RU_4fcjwskW9AAfEDrB/exec";
+  const { SCRIPT_URL } = window.APP_CONFIG || {};
+  const name=sessionStorage.getItem('tv_name')||'Guest';
+  const course=sessionStorage.getItem('tv_course')||'agent';
+  const company=sessionStorage.getItem('tv_company')||'';
+  document.getElementById('hdr').textContent=course==='supervisor'?'Supervisor Training Videos':course==='admin'?'Admin Training Videos':'Agent Training Videos';
+  document.getElementById('seriesTitle').textContent=course==='supervisor'?'Supervisor Series':course==='admin'?'Admin Series':'Agent Series';
+  document.getElementById('who').textContent=`${name}${company?' • '+company:''}`;
 
-  // Read who/what from session
-  const name = sessionStorage.getItem('tv_name') || 'Guest';
-  const course = sessionStorage.getItem('tv_course') || 'agent';
-  const company = sessionStorage.getItem('tv_company') || '';
-
-  document.getElementById('hdr').textContent =
-    (course === 'supervisor' ? 'Supervisor Training Videos' :
-     course === 'admin' ? 'Admin Training Videos' : 'Agent Training Videos');
-
-  document.getElementById('seriesTitle').textContent =
-    (course === 'supervisor' ? 'Supervisor Series' :
-     course === 'admin' ? 'Admin Series' : 'Agent Series');
-
-  document.getElementById('who').textContent = `${name}${company ? ' • ' + company : ''}`;
-
-  // Playlists by course
-  const PLAYLISTS = {
-    agent: [
+  const PLAYLISTS={
+    agent:[
       ['Agent login','AgentVideos/Agent%20Login%20(Desktop).mp4'],
       ['Profile settings','AgentVideos/Profiles%20Settings.mp4'],
       ['Agent state','AgentVideos/Agent%20State.mp4'],
@@ -88,64 +79,22 @@
       ['Side navigation','AgentVideos/Side%20Navigation.mp4'],
       ['Sign out','AgentVideos/Sign%20Out.mp4']
     ],
-    supervisor: [
-      ['Example supervisor clip','SupVideos/IMG_3339.mov']
-    ],
-    admin: [
-      ['Admin intro','AgentVideos/Agent%20Login%20(Desktop).mp4']
-    ]
+    supervisor:[['Example supervisor clip','SupVideos/IMG_3339.mov']],
+    admin:[['Admin intro','AgentVideos/Agent%20Login%20(Desktop).mp4']]
   };
-
-  const videos = PLAYLISTS[course] || PLAYLISTS.agent;
-
-  // Simple logger (POST text/plain to avoid preflight)
+  const videos=PLAYLISTS[course]||PLAYLISTS.agent;
   async function logEvent(payload){
-    try{
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
-    }catch(_){}
+    try{await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});}catch(_){}
   }
 
-  // Build UI
-  const list = document.getElementById('list');
-  const player = document.getElementById('player');
-  const progress = document.getElementById('progress');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-
-  let idx = 0;
-  function renderList(){
-    list.innerHTML = videos.map((v,i)=>`<li${i===idx?' style="font-weight:800"':''}>${v[0]}</li>`).join('');
-    progress.textContent = `Video ${idx+1} of ${videos.length}`;
-  }
-  function load(i){
-    idx = Math.max(0, Math.min(videos.length-1, i));
-    player.src = videos[idx][1];
-    player.currentTime = 0;
-    renderList();
-  }
-  prevBtn.onclick = ()=> load(idx-1);
-  nextBtn.onclick = ()=> load(idx+1);
-
-  // On complete, go next (and log completion)
-  player.addEventListener('ended', ()=>{
-    logEvent({
-      type:'completion',
-      name, course, company,
-      ts: Date.now(),
-      page: 'videos',
-      ua: navigator.userAgent,
-      videos: { index: idx, title: videos[idx][0], src: videos[idx][1] }
-    });
-    if (idx < videos.length-1) load(idx+1);
-  });
-
-  // Start
-  renderList();
-  load(0);
+  const list=document.getElementById('list'),player=document.getElementById('player'),progress=document.getElementById('progress');
+  const prevBtn=document.getElementById('prevBtn'),nextBtn=document.getElementById('nextBtn');
+  let idx=0;
+  function renderList(){list.innerHTML=videos.map((v,i)=>`<li${i===idx?' style="font-weight:800"':''}>${v[0]}</li>`).join('');progress.textContent=`Video ${idx+1} of ${videos.length}`;}
+  function load(i){idx=Math.max(0,Math.min(videos.length-1,i));player.src=videos[idx][1];player.currentTime=0;renderList();}
+  prevBtn.onclick=()=>load(idx-1);nextBtn.onclick=()=>load(idx+1);
+  player.addEventListener('ended',()=>{logEvent({type:'completion',name,course,company,page:'videos',ua:navigator.userAgent,ts:Date.now(),videos:{index:idx,title:videos[idx][0],src:videos[idx][1]}});if(idx<videos.length-1)load(idx+1);});
+  renderList();load(0);
   </script>
 </body>
 </html>
