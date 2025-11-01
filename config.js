@@ -1,11 +1,9 @@
-// Shared configuration for all Training Portal pages
+<script>
 window.APP_CONFIG = {
-  // Update this URL when you redeploy your Google Apps Script
-  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzANcSixCAEfvqcj7fOfAQn7TaHkeYcOh3msNSeuwkK2eKwdLTqgQ0U9jCJXSyrswJW/exec",
-  
-  // Must match the SECRET_TOKEN in your Apps Script
+  SCRIPT_URL: "hhttps://script.google.com/macros/s/AKfycbzANcSixCAEfvqcj7fOfAQn7TaHkeYcOh3msNSeuwkK2eKwdLTqgQ0U9jCJXSyrswJW/exec",
   ADMIN_TOKEN: "CXASTrainingPortal25",
-
-  // Admin login password (used only for the web UI)
-  ADMIN_PASS: "cooladmin"
+  ADMIN_PASS:  "cooladmin",
+  BRAND:       "Training Portal",
+  TIMEZONE:    "America/New_York"
 };
+</script>
