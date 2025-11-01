@@ -6,10 +6,8 @@
 <title>Training Videos</title>
 <meta name="color-scheme" content="dark">
 <style>
-  :root {
-    --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --input:#0e1525;
-    --border:rgba(255,255,255,.08); --accentA:#22d3ee; --accentB:#3b82f6;
-  }
+  :root { --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --input:#0e1525;
+          --border:rgba(255,255,255,.08); --accentA:#22d3ee; --accentB:#3b82f6; }
   *{box-sizing:border-box}
   body{margin:0;font-family:ui-sans-serif,system-ui;background:#0b1020;color:#e9edf5;min-height:100vh}
   header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
@@ -29,7 +27,7 @@
 </head>
 <body>
   <header>
-    <a class="btnLink" href="home.html">← Back</a>
+    <a class="btnLink" href="index.html">← Back</a>
     <div style="font-weight:800">Training Videos</div>
     <div></div>
   </header>
@@ -49,15 +47,21 @@
   </div>
 
 <script>
-/* ====== SET YOUR BACKEND URL ====== */
+/* ====== Backend URL (same one used on index/admin) ====== */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuTjMnhZbFd_sMhJJUZUBw-UlAXpRRlXkYXH7dlJvwr0Bz9mjk_8X-YPveB58WP58c/exec";
 
-/* ====== USER CONTEXT (set in home.html) ====== */
-const user = (()=>{ try{ return JSON.parse(sessionStorage.getItem('tp_user')||'null'); }catch{ return null; }})();
-if(!user){ location.href='home.html'; }
+/* ====== Load user (session first; fall back to old localStorage keys) ====== */
+let user = null;
+try { user = JSON.parse(sessionStorage.getItem('tp_user') || 'null'); } catch {}
+if (!user) {
+  const name = localStorage.getItem('training_visitor_name');
+  const company = localStorage.getItem('training_company');
+  const course = new URL(location.href).searchParams.get('course');
+  if (name && course) user = { name, company: company || '', course };
+}
+if (!user) { location.href = 'index.html'; }
 
-/* ====== PLAYLISTS ======
-   Update paths/titles to match your repo files exactly. */
+/* ====== Playlists ====== */
 function playlistFor(course){
   if(course === 'agent'){
     return [
@@ -69,36 +73,26 @@ function playlistFor(course){
       { title:'Sign out',            src:'AgentVideos/Sign%20Out.mp4' }
     ];
   }
-  if(course === 'supervisor'){
-    // Example placeholder—replace with your real supervisor videos
-    return [
-      { title:'Supervisor intro', src:'SupVideos/IMG_3339.mov' }
-    ];
-  }
-  if(course === 'admin'){
-    // Example placeholder—replace with your real admin videos
-    return [
-      { title:'Admin intro', src:'AdminVideos/intro.mp4' }
-    ];
-  }
+  if(course === 'supervisor'){ return [{ title:'Supervisor intro', src:'SupVideos/IMG_3339.mov' }]; }
+  if(course === 'admin'){      return [{ title:'Admin intro',      src:'AdminVideos/intro.mp4' }]; }
   return [];
 }
 
-/* ====== UI HOOKS ====== */
+/* ====== UI hooks ====== */
 const listEl   = document.getElementById('list');
 const statusEl = document.getElementById('status');
 const player   = document.getElementById('player');
 const courseTitle = document.getElementById('courseTitle');
 
-/* ====== STATE ====== */
+/* ====== State ====== */
 const vids = playlistFor(user.course);
 let idx = 0;
 let finished = new Array(vids.length).fill(false);
-let jumping = false; // guard against mobile "ended" quirk
+let jumping = false;
 
-courseTitle.textContent = `${user.company} — ${user.course[0].toUpperCase()+user.course.slice(1)} Training`;
+courseTitle.textContent = `${user.company || ''} — ${user.course[0].toUpperCase()+user.course.slice(1)} Training`;
 
-/* ====== RENDER LIST ====== */
+/* ====== Render list ====== */
 function renderList(){
   listEl.innerHTML = vids.map((v,i)=>`
     <li class="item ${i===idx?'active':''}" data-i="${i}">
@@ -116,7 +110,7 @@ function renderList(){
   statusEl.textContent = `${doneCount}/${vids.length} completed`;
 }
 
-/* ====== LOAD CURRENT VIDEO ====== */
+/* ====== Load current ====== */
 function loadCurrent(autoplay){
   jumping = true;
   player.src = vids[idx].src;
@@ -126,42 +120,30 @@ function loadCurrent(autoplay){
   setTimeout(()=> jumping=false, 200);
 }
 
-/* ====== ON END: advance, and when all finished, log completion ====== */
+/* ====== On ended ====== */
 player.addEventListener('ended', ()=>{
-  if (jumping) return; // ignore spurious ended on mobile seeks
+  if (jumping) return;
   finished[idx] = true;
   const allDone = finished.every(Boolean);
 
   if (allDone){
     const videos_json = vids.map((v,i)=>({ index:i, title:v.title, src:v.src }));
-    // Best-effort POST; we don't block the UI on failure
     fetch(SCRIPT_URL, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         mode:'completion',
-        name:user.name,
-        course:user.course,
-        company:user.company,
-        ts_client: Date.now(),
-        page:'videos',
-        ua: navigator.userAgent,
-        videos_json
+        name:user.name, course:user.course, company:user.company || '',
+        ts_client: Date.now(), page:'videos', ua:navigator.userAgent, videos_json
       })
     }).catch(()=>{});
   }
 
-  // Move to the next video (if any)
-  if (idx < vids.length - 1){
-    idx++;
-    loadCurrent(true);
-  } else {
-    renderList();
-  }
+  if (idx < vids.length - 1){ idx++; loadCurrent(true); } else { renderList(); }
 });
 
-/* ====== BOOT ====== */
+/* ====== Boot ====== */
 if (!vids.length){
-  courseTitle.textContent = `${user.company} — ${user.course} Training`;
+  courseTitle.textContent = `${user.company || ''} — ${user.course} Training`;
   statusEl.textContent = 'No videos assigned for this course yet.';
 } else {
   loadCurrent(false);
