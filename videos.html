@@ -6,38 +6,29 @@
   <title>Training Videos</title>
   <meta name="color-scheme" content="dark">
   <style>
-    :root{
-      --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
-      --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08);
-    }
+    :root{ --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --accentA:#22d3ee; --accentB:#3b82f6; --border:rgba(255,255,255,.08); }
     *,*::before,*::after{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
-         background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--fg)}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans"; background:linear-gradient(180deg,var(--bg),var(--bg2)); color:var(--fg)}
     header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
     .wrap{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
     .brand{font-weight:800;letter-spacing:.2px}
     .logo{height:36px}
-
     main{max-width:1100px;margin:28px auto;padding:0 16px}
     .shell{display:grid; grid-template-columns: 2fr 1fr; gap:22px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;
-          box-shadow:0 10px 30px rgba(0,0,0,.25);}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
     h1{margin:.1rem 0 .6rem;font-size:1.6rem}
     .muted{color:var(--muted)}
     .titleRow{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;
-         font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer}
+    .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer}
     .btn.small{padding:8px 14px;font-size:.9rem}
     .btn.secondary{background:#0e1525;color:var(--fg);border:1px solid var(--border)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .btn:active{transform:translateY(1px)}
     .embed{position:relative; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:14px; background:#000; border:1px solid var(--border)}
-    video.player{position:absolute; top:0; left:0; width:100%; height:100%; border:0; background:#000}
+    video.player{position:absolute; top:0; left:0; width:100%; height:100%; background:#000}
     .row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:10px}
     .pill{font-size:.85rem;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#0e1525}
     .list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-    .item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);
-          background:#0e1525;border-radius:12px}
+    .item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--border);background:#0e1525;border-radius:12px}
     .item[aria-current="true"]{outline:2px solid rgba(125,211,252,.35)}
     .progress{height:8px;background:#0e1525;border:1px solid var(--border);border-radius:999px;overflow:hidden}
     .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accentA),var(--accentB))}
@@ -64,13 +55,9 @@
     </div>
 
     <section class="shell">
-      <!-- Player -->
       <section class="card">
         <div id="nowTitle" class="muted" style="margin:0 0 6px">Now playing</div>
-        <div class="embed"><video id="player" class="player"
-          controls controlslist="nodownload noplaybackrate"
-          disablepictureinpicture
-          preload="metadata" src=""></video></div>
+        <div class="embed"><video id="player" class="player" controls controlslist="nodownload noplaybackrate" disablepictureinpicture preload="metadata"></video></div>
 
         <div class="row">
           <div class="pill"><span id="timeCur">0:00</span> / <span id="timeDur">0:00</span></div>
@@ -87,37 +74,27 @@
         </div>
       </section>
 
-      <!-- Playlist -->
       <aside class="card">
         <h3 style="margin:0 0 10px">Playlist</h3>
-        <ul id="list" class="list" aria-label="Training playlist"></ul>
+        <ul id="list" class="list"></ul>
         <div id="emptyMsg" class="empty" style="display:none">No videos yet for this course.</div>
       </aside>
     </section>
   </main>
 
   <script>
-    // Auth + greeting
-    const AUTH_KEY="training_authed", NAME_KEY="training_visitor_name";
-    if(localStorage.getItem(AUTH_KEY)!=="true"){
-      location.href=new URL("index.html",location.href).toString();
-    }
+    const AUTH_KEY="training_authed", NAME_KEY="training_visitor_name", COMPANY_KEY="training_company";
+    if(localStorage.getItem(AUTH_KEY)!=="true"){ location.href="index.html"; }
     const viewerName = localStorage.getItem(NAME_KEY) || "guest";
+    const viewerCompany = localStorage.getItem(COMPANY_KEY) || "";
     document.getElementById("who").textContent = viewerName;
 
-    // Which course?
     const params = new URLSearchParams(location.search);
     const COURSE_KEY = params.get('course') || 'agent';
 
-    // Update page title dynamically
-    const titleMap = {
-      agent: "Agent Training Videos",
-      supervisor: "Supervisor Training Videos",
-      admin: "Admin Training Videos"
-    };
+    const titleMap = { agent:"Agent Training Videos", supervisor:"Supervisor Training Videos", admin:"Admin Training Videos" };
     document.getElementById("pageTitle").textContent = titleMap[COURSE_KEY] || "Training Videos";
 
-    // Playlists
     const COURSES = {
       agent: [
         { id:"v1", title:"Agent Login (Desktop)", src:"AgentVideos/Agent%20Login%20(Desktop).mp4" },
@@ -130,16 +107,11 @@
       supervisor: [
         { id:"s1", title:"Supervisor Walkthrough", src:"SupVideos/IMG_3339.mov" }
       ],
-      admin: [
-        // Add Admin videos later as needed
-      ]
+      admin: []
     };
     const VIDEOS = COURSES[COURSE_KEY] || COURSES.agent;
+    const WEBHOOK="https://script.google.com/macros/s/AKfycbzWSJyQjOE27h-ObOOQMVkL2qT-fgT6jGwfVKfqs_zq6Bzc0x-serwvLJq9Yg1Cm7EW/exec";
 
-    // Completion webhook (latest)
-    const COMPLETION_WEBHOOK="https://script.google.com/macros/s/AKfycbzWftfQypoGfeZLQZGX8tE5JdlNQzLsAvG3Vo7tVEqm_LWh50H6flr962FCVcyUcXAe/exec";
-
-    // UI refs
     const player = document.getElementById("player");
     const nowTitle = document.getElementById("nowTitle");
     const timeCur = document.getElementById("timeCur");
@@ -153,30 +125,26 @@
     const emptyMsg = document.getElementById("emptyMsg");
 
     document.getElementById("logout").addEventListener("click",()=>{
-      localStorage.removeItem(AUTH_KEY); localStorage.removeItem(NAME_KEY);
-      location.href=new URL("index.html",location.href).toString();
+      localStorage.removeItem(AUTH_KEY); localStorage.removeItem(NAME_KEY); localStorage.removeItem(COMPANY_KEY);
+      location.href="index.html";
     });
 
-    // Progress tracking
     const STORAGE_KEY="training_progress_v2_" + COURSE_KEY;
     let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
     if(!progress){ progress = { index: 0, per: (VIDEOS.length? VIDEOS: []).map(()=>({watched:0,dur:0,done:false})) }; save(); }
     function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }
-
     const fmt = s => { s=Math.max(0,Math.floor(s||0)); const m=Math.floor(s/60), r=String(s%60).padStart(2,"0"); return `${m}:${r}`; };
 
     function updateOverall(){
-      const total = VIDEOS.length;
-      const done = progress.per.filter(p=>p.done).length;
+      const total = VIDEOS.length, done = progress.per.filter(p=>p.done).length;
       const pct = total ? Math.round((done / total) * 100) : 0;
       overallPct.textContent = pct; bigBar.style.width = pct + "%";
       if(total && done === total && !progress.completed){
         progress.completed = new Date().toISOString(); save();
         try{
-          fetch(COMPLETION_WEBHOOK, {
-            method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
+          fetch(WEBHOOK,{ method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
             body: JSON.stringify({
-              type:"completion", course: COURSE_KEY, name: viewerName, ts: progress.completed,
+              type:"completion", course: COURSE_KEY, name: viewerName, company: viewerCompany, ts: progress.completed,
               videos: VIDEOS.map((v,i)=>({ title:v.title, watched:progress.per[i].watched, duration:progress.per[i].dur, done:progress.per[i].done }))
             })
           });
@@ -187,138 +155,64 @@
 
     function renderList(){
       listEl.innerHTML = "";
-      if (!VIDEOS.length){
-        emptyMsg.style.display = "block"; return;
-      } else { emptyMsg.style.display = "none"; }
-
-      if (progress.per.length !== VIDEOS.length){
-        progress.per = VIDEOS.map((_,i)=> progress.per[i] || {watched:0,dur:0,done:false}); save();
-      }
+      if (!VIDEOS.length){ emptyMsg.style.display="block"; return; } else { emptyMsg.style.display="none"; }
+      if (progress.per.length !== VIDEOS.length){ progress.per = VIDEOS.map((_,i)=> progress.per[i] || {watched:0,dur:0,done:false}); save(); }
       VIDEOS.forEach((v,i)=>{
         const li = document.createElement("li");
         li.className = "item" + (progress.per[i].done ? " done" : "");
-        li.setAttribute("data-i", i);
         if(i === progress.index) li.setAttribute("aria-current","true");
-
         const pct = progress.per[i].dur ? Math.min(100, Math.round(progress.per[i].watched/progress.per[i].dur*100)) : 0;
-        const left = document.createElement("div");
-        left.innerHTML = `<div style="font-weight:700">${v.title}</div>
-          <div class="progress" style="margin-top:6px;width:160px"><div class="bar" style="width:${pct}%"></div></div>`;
-        const right = document.createElement("div");
-        right.innerHTML = progress.per[i].done ? `<span class="check">✓</span>` : `<span class="muted">${fmt(progress.per[i].watched)}</span>`;
-        li.append(left, right);
-        li.style.cursor = "pointer";
-        li.addEventListener("click", ()=> load(i, { replay: true }));
+        li.innerHTML = `<div><div style="font-weight:700">${v.title}</div>
+          <div class="progress" style="margin-top:6px;width:160px"><div class="bar" style="width:${pct}%"></div></div></div>
+          <div>${progress.per[i].done ? '<span class="check">✓</span>' : `<span class="muted">${fmt(progress.per[i].watched)}</span>`}</div>`;
+        li.style.cursor="pointer"; li.addEventListener("click", ()=> load(i, { replay:true }));
         listEl.appendChild(li);
       });
       updateOverall();
     }
 
-    // Anti-skip logic
-    let maxAllowed = 0;
-    let replayMode = false;
+    let maxAllowed = 0, replayMode = false;
 
     function load(i, opts = {}){
-      if (!VIDEOS.length){ return; }
-      progress.index = i; save();
-      replayMode = !!opts.replay;
-
-      const v = VIDEOS[i];
-      nowTitle.textContent = "Now playing — " + v.title;
-      player.src = v.src;
-      nextBtn.disabled = true;
-      prevBtn.disabled = (i === 0);
-
-      if (replayMode) {
-        maxAllowed = Infinity;
-        player.currentTime = 0;
-      } else {
-        maxAllowed = progress.per[i].watched || 0;
-        player.currentTime = maxAllowed;
-      }
-      player.play().catch(()=>{});
-      renderList();
+      if (!VIDEOS.length) return;
+      progress.index = i; save(); replayMode = !!opts.replay;
+      const v = VIDEOS[i]; nowTitle.textContent = "Now playing — " + v.title;
+      player.src = v.src; nextBtn.disabled = true; prevBtn.disabled = (i === 0);
+      if (replayMode){ maxAllowed = Infinity; player.currentTime = 0; } 
+      else { maxAllowed = progress.per[i].watched || 0; player.currentTime = maxAllowed; }
+      player.play().catch(()=>{}); renderList();
     }
 
     player.addEventListener("loadedmetadata", ()=>{
-      if (!VIDEOS.length) return;
-      const i = progress.index;
-      progress.per[i].dur = player.duration || progress.per[i].dur;
-      timeDur.textContent = fmt(progress.per[i].dur);
-      if (!replayMode) {
-        const resumeAt = Math.min(progress.per[i].watched, Math.max(0,(player.duration||1)-1));
-        player.currentTime = resumeAt;
-        maxAllowed = resumeAt;
-      } else {
-        player.currentTime = 0;
-      }
+      if (!VIDEOS.length) return; const i = progress.index;
+      progress.per[i].dur = player.duration || progress.per[i].dur; timeDur.textContent = fmt(progress.per[i].dur);
+      if (!replayMode){ const resume = Math.min(progress.per[i].watched, Math.max(0,(player.duration||1)-1)); player.currentTime = resume; maxAllowed = resume; }
+      else { player.currentTime = 0; }
       timeCur.textContent = fmt(player.currentTime);
     });
-
     player.addEventListener("timeupdate", ()=>{
-      if (!VIDEOS.length) return;
-      const i = progress.index;
-      const cur = player.currentTime || 0;
-      timeCur.textContent = fmt(cur);
-      if (!replayMode) {
-        if(cur > maxAllowed) maxAllowed = cur;
-        progress.per[i].watched = Math.max(progress.per[i].watched, maxAllowed);
-        save();
-        renderList();
-      }
+      if (!VIDEOS.length) return; const i = progress.index; const cur = player.currentTime || 0; timeCur.textContent = fmt(cur);
+      if (!replayMode){ if(cur > maxAllowed) maxAllowed = cur; progress.per[i].watched = Math.max(progress.per[i].watched, maxAllowed); save(); renderList(); }
     });
-
-    player.addEventListener("seeking", ()=>{
-      if (replayMode || !VIDEOS.length) return;
-      const target = player.currentTime || 0;
-      if(target > maxAllowed + 1){ player.currentTime = maxAllowed; }
-    });
-
+    player.addEventListener("seeking", ()=>{ if (!replayMode){ const t = player.currentTime||0; if(t > maxAllowed + 1) player.currentTime = maxAllowed; }});
     player.addEventListener("ended", ()=>{
-      if (!VIDEOS.length) return;
-      const i = progress.index;
-      const dur = progress.per[i].dur || player.duration || 0;
-      if (!replayMode) {
+      if (!VIDEOS.length) return; const i = progress.index; const dur = progress.per[i].dur || player.duration || 0;
+      if (!replayMode){
         if((Math.max(maxAllowed, player.currentTime)) >= 0.98 * dur){
-          progress.per[i].done = true; save(); renderList();
-          nextBtn.disabled = (i >= VIDEOS.length - 1);
-          if(i < VIDEOS.length - 1){ setTimeout(()=> load(i+1), 600); }
-          else { updateOverall(); }
+          progress.per[i].done = true; save(); renderList(); nextBtn.disabled = (i >= VIDEOS.length - 1);
+          if(i < VIDEOS.length - 1){ setTimeout(()=> load(i+1), 600); } else { updateOverall(); }
         }
-      } else {
-        nextBtn.disabled = !(progress.per[i].done) || i >= VIDEOS.length - 1;
-      }
+      } else { nextBtn.disabled = !(progress.per[i].done) || i >= VIDEOS.length - 1; }
     });
 
-    nextBtn.addEventListener("click", ()=>{
-      const i = progress.index;
-      if(i < VIDEOS.length - 1) load(i+1);
-    });
-    prevBtn.addEventListener("click", ()=>{
-      const i = progress.index;
-      if(i > 0) load(i-1, { replay:false });
-    });
-    restartBtn.addEventListener("click", ()=>{
-      const i = progress.index;
-      load(i, { replay:true });
-    });
+    nextBtn.addEventListener("click", ()=>{ const i = progress.index; if(i < VIDEOS.length - 1) load(i+1); });
+    prevBtn.addEventListener("click", ()=>{ const i = progress.index; if(i > 0) load(i-1, { replay:false }); });
+    restartBtn.addEventListener("click", ()=> load(progress.index, { replay:true }));
 
-    setInterval(()=>{
-      if (!VIDEOS.length) return;
-      const i = progress.index;
-      nextBtn.disabled = (!progress.per[i].done && !replayMode) || i >= VIDEOS.length - 1;
-    }, 400);
+    setInterval(()=>{ if (VIDEOS.length){ const i = progress.index; nextBtn.disabled = (!progress.per[i].done && !replayMode) || i >= VIDEOS.length - 1; } }, 400);
 
-    // Init
-    if (!VIDEOS.length){
-      renderList();
-      nowTitle.textContent = "No videos to play";
-      nextBtn.disabled = prevBtn.disabled = restartBtn.disabled = true;
-      timeCur.textContent = "0:00"; timeDur.textContent = "0:00";
-    } else {
-      renderList();
-      load(Math.min(progress.index, VIDEOS.length-1), { replay:false });
-    }
+    if (!VIDEOS.length){ renderList(); nowTitle.textContent="No videos to play"; nextBtn.disabled=prevBtn.disabled=restartBtn.disabled=true; }
+    else { renderList(); load(Math.min(progress.index, VIDEOS.length-1), { replay:false }); }
   </script>
 </body>
 </html>
