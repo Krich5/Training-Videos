@@ -6,20 +6,15 @@
   <title>Training Admin</title>
   <meta name="color-scheme" content="dark">
   <style>
-    :root{
-      --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
-      --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08);
-    }
+    :root{ --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08);}
     *,*::before,*::after{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
-         background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--fg)}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans"; background:linear-gradient(180deg,var(--bg),var(--bg2)); color:var(--fg)}
     header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
     .wrap{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
     .left{display:flex;align-items:center;gap:10px}
     .brand{font-weight:800;letter-spacing:.2px}
     .logo{height:36px}
-    .btnLink{background:#0e1525;color:var(--fg);border:1px solid var(--border);
-             font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
+    .btnLink{background:#0e1525;color:var(--fg);border:1px solid var(--border); font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
     main{max-width:1100px;margin:28px auto;padding:0 16px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -47,7 +42,7 @@
   </header>
 
   <main>
-    <!-- Admin sign-in -->
+    <!-- Admin gate -->
     <section id="gate" class="card">
       <div class="row">
         <label for="adminPass" class="muted">Admin password</label>
@@ -57,153 +52,145 @@
       </div>
     </section>
 
-    <!-- Controls + table -->
-    <section id="panel" class="card" style="display:none">
+    <!-- Customers -->
+    <section id="customers" class="card" style="display:none">
+      <div class="row" style="justify-content:space-between">
+        <div class="row">
+          <button id="addCompanyBtn" class="btn">Add company</button>
+          <button id="refreshCustomersBtn" class="btn secondary">Refresh</button>
+        </div>
+        <button id="logoutTop" class="btn">Log out</button>
+      </div>
+      <div style="overflow:auto">
+        <table>
+          <thead><tr><th>Company</th><th>Agent code</th><th>Supervisor code</th><th>Admin code</th><th>Active</th><th>Created</th></tr></thead>
+          <tbody id="custBody"><tr><td colspan="6" class="center muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Logs -->
+    <section id="panel" class="card" style="display:none; margin-top:18px">
       <div class="row" style="justify-content:space-between">
         <div class="row">
           <span class="pill">Rows: <span id="rowCount">0</span></span>
-          <select id="typeFilter">
-            <option value="">All types</option>
-            <option value="signin">signin</option>
-            <option value="completion">completion</option>
-          </select>
+          <select id="typeFilter"><option value="">All types</option><option value="signin">signin</option><option value="completion">completion</option></select>
           <input id="courseFilter" placeholder="Course (e.g., agent)"/>
-          <input id="search" placeholder="Search name/UA/page"/>
+          <input id="search" placeholder="Search name/UA/page/company"/>
           <button id="refresh" class="btn secondary">Refresh</button>
           <button id="downloadCsv" class="btn secondary">Download CSV</button>
         </div>
         <button id="logout" class="btn">Log out</button>
       </div>
-
       <div style="overflow:auto">
         <table id="tbl">
-          <thead>
-            <tr>
-              <th>ts_server</th>
-              <th>type</th>
-              <th>name</th>
-              <th>course</th>
-              <th>ts_client</th>
-              <th>page</th>
-              <th>ua</th>
-              <th>videos_json</th>
-            </tr>
-          </thead>
-          <tbody id="tbody">
-            <tr><td colspan="8" class="center muted">Loading…</td></tr>
-          </tbody>
+          <thead><tr>
+            <th>ts_server</th><th>type</th><th>name</th><th>course</th><th>company</th>
+            <th>ts_client</th><th>page</th><th>ua</th><th>videos_json</th>
+          </tr></thead>
+          <tbody id="tbody"><tr><td colspan="9" class="center muted">Loading…</td></tr></tbody>
         </table>
       </div>
     </section>
   </main>
 
   <script>
-  // === CONFIG ===
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWftfQypoGfeZLQZGX8tE5JdlNQzLsAvG3Vo7tVEqm_LWh50H6flr962FCVcyUcXAe/exec";
-  const ADMIN_TOKEN = "CHANGE_ME_ADMIN_TOKEN"; // must match SECRET_TOKEN in Apps Script
-  const ADMIN_PASS  = "cooladmin";            // UI gate
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWSJyQjOE27h-ObOOQMVkL2qT-fgT6jGwfVKfqs_zq6Bzc0x-serwvLJq9Yg1Cm7EW/exec";
+  const ADMIN_TOKEN = "CHANGE_ME_ADMIN_TOKEN"; // must match SECRET_TOKEN
+  const ADMIN_PASS  = "cooladmin";
 
-  // === Admin gate ===
   const gate = document.getElementById('gate');
   const panel = document.getElementById('panel');
+  const customers = document.getElementById('customers');
   const gateErr = document.getElementById('gateErr');
-
   const ADMIN_OK_KEY = "training_admin_ok";
-  function showPanel(){ gate.style.display='none'; panel.style.display=''; loadData(); }
-  function showGate(){ panel.style.display='none'; gate.style.display=''; }
+
+  function showApp(){ gate.style.display='none'; customers.style.display=''; panel.style.display=''; loadCustomers(); loadLogs(); }
+  function showGate(){ gate.style.display=''; customers.style.display='none'; panel.style.display='none'; }
 
   document.getElementById('adminBtn').addEventListener('click', ()=>{
     const val = document.getElementById('adminPass').value;
-    gateErr.textContent = "";
-    if(val === ADMIN_PASS){
-      sessionStorage.setItem(ADMIN_OK_KEY, "true");
-      showPanel();
-    }else{
-      gateErr.textContent = "Incorrect password.";
-    }
+    gateErr.textContent = ""; if(val === ADMIN_PASS){ sessionStorage.setItem(ADMIN_OK_KEY, "true"); showApp(); }
+    else { gateErr.textContent = "Incorrect password."; }
   });
 
-  // Log out → return to MAIN page (index.html)
-  document.getElementById('logout').addEventListener('click', ()=>{
-    sessionStorage.removeItem(ADMIN_OK_KEY);
-    window.location.href = 'index.html';
-  });
+  const doLogout = ()=>{ sessionStorage.removeItem(ADMIN_OK_KEY); location.href = 'index.html'; };
+  document.getElementById('logout').addEventListener('click', doLogout);
+  document.getElementById('logoutTop').addEventListener('click', doLogout);
+  if(sessionStorage.getItem(ADMIN_OK_KEY) === "true"){ showApp(); }
 
-  // Auto-open if prior session
-  if(sessionStorage.getItem(ADMIN_OK_KEY) === "true"){ showPanel(); }
-
-  // === Data + Table ===
-  const tbody = document.getElementById('tbody');
-  const rowCount = document.getElementById('rowCount');
-  const typeFilter = document.getElementById('typeFilter');
-  const courseFilter = document.getElementById('courseFilter');
-  const search = document.getElementById('search');
-  const refresh = document.getElementById('refresh');
-  const downloadCsv = document.getElementById('downloadCsv');
-
-  let allRows = [];
-
-  async function loadData(){
-    tbody.innerHTML = `<tr><td colspan="8" class="center muted">Loading…</td></tr>`;
+  // Customers
+  const custBody = document.getElementById('custBody');
+  document.getElementById('refreshCustomersBtn').addEventListener('click', loadCustomers);
+  document.getElementById('addCompanyBtn').addEventListener('click', async ()=>{
+    const name = prompt('Company name'); if (!name) return;
     try{
-      const url = `${SCRIPT_URL}?mode=json&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=2000`;
-      const res = await fetch(url, { method:'GET' });
+      const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'addCompany', token: ADMIN_TOKEN, company: name }) });
       const data = await res.json();
-      allRows = (data && data.rows) ? data.rows : [];
-      render();
-    }catch(e){
-      tbody.innerHTML = `<tr><td colspan="8" class="center error">Failed to load data. Check SCRIPT_URL / token / deployment.</td></tr>`;
-    }
-  }
-
-  function render(){
-    const t = (s)=> (s==null || s==="") ? "" : String(s);
-    const q = search.value.trim().toLowerCase();
-    const tf = typeFilter.value.trim().toLowerCase();
-    const cf = courseFilter.value.trim().toLowerCase();
-
-    const rows = allRows.filter(r=>{
-      const okType = !tf || t(r.type).toLowerCase() === tf;
-      const okCourse = !cf || t(r.course).toLowerCase().includes(cf);
-      const text = (t(r.name) + " " + t(r.ua) + " " + t(r.page)).toLowerCase();
-      const okQ = !q || text.includes(q);
-      return okType && okCourse && okQ;
-    });
-
-    rowCount.textContent = rows.length.toString();
-
-    if (!rows.length){
-      tbody.innerHTML = `<tr><td colspan="8" class="center muted">No rows.</td></tr>`;
-      return;
-    }
-
-    const html = rows.map(r=>{
-      const safe = (v)=> v==null ? "" : String(v);
-      return `<tr>
-        <td>${safe(r.ts_server)}</td>
-        <td>${safe(r.type)}</td>
-        <td>${safe(r.name)}</td>
-        <td>${safe(r.course)}</td>
-        <td>${safe(r.ts_client)}</td>
-        <td>${safe(r.page)}</td>
-        <td class="muted">${safe(r.ua)}</td>
-        <td><code style="font-size:.85rem">${safe(r.videos_json)}</code></td>
-      </tr>`;
-    }).join('');
-
-    tbody.innerHTML = html;
-  }
-
-  typeFilter.addEventListener('change', render);
-  courseFilter.addEventListener('input', render);
-  search.addEventListener('input', render);
-  refresh.addEventListener('click', loadData);
-
-  downloadCsv.addEventListener('click', ()=>{
-    const url = `${SCRIPT_URL}?mode=csv&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=5000`;
-    const a = document.createElement('a');
-    a.href = url; a.download = 'training_logs.csv'; a.click();
+      if (!data.ok) { alert('Error: ' + (data.error||'unknown')); return; }
+      await loadCustomers();
+      alert(`Codes for "${data.company}":\nAgent: ${data.agent}\nSupervisor: ${data.supervisor}\nAdmin: ${data.admin}`);
+    }catch(e){ alert('Server error'); }
   });
+  async function loadCustomers(){
+    custBody.innerHTML = `<tr><td colspan="6" class="center muted">Loading…</td></tr>`;
+    try{
+      const res = await fetch(`${SCRIPT_URL}?mode=customers&token=${encodeURIComponent(ADMIN_TOKEN)}`);
+      const data = await res.json(); const rows = (data && data.rows) ? data.rows : [];
+      if (!rows.length){ custBody.innerHTML = `<tr><td colspan="6" class="center muted">No companies yet.</td></tr>`; return; }
+      custBody.innerHTML = rows.map(r=>`
+        <tr>
+          <td>${r.company||''}</td>
+          <td><code>${r.agent_code||''}</code></td>
+          <td><code>${r.supervisor_code||''}</code></td>
+          <td><code>${r.admin_code||''}</code></td>
+          <td>${String(r.active).toLowerCase()!=='false'?'Yes':'No'}</td>
+          <td>${r.created_ts||''}</td>
+        </tr>`).join('');
+    }catch(e){
+      custBody.innerHTML = `<tr><td colspan="6" class="center error">Failed to load customers (check token/URL/deployment)</td></tr>`;
+    }
+  }
+
+  // Logs
+  const tbody = document.getElementById('tbody'), rowCount = document.getElementById('rowCount');
+  const typeFilter = document.getElementById('typeFilter'), courseFilter = document.getElementById('courseFilter'), search = document.getElementById('search');
+  document.getElementById('refresh').addEventListener('click', loadLogs);
+  document.getElementById('downloadCsv').addEventListener('click', ()=>{
+    const a = document.createElement('a'); a.href = `${SCRIPT_URL}?mode=csv&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=5000`; a.download = 'training_logs.csv'; a.click();
+  });
+  let allRows = [];
+  async function loadLogs(){
+    tbody.innerHTML = `<tr><td colspan="9" class="center muted">Loading…</td></tr>`;
+    try{
+      const res = await fetch(`${SCRIPT_URL}?mode=json&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=2000`);
+      const data = await res.json(); allRows = (data && data.rows) ? data.rows : []; renderLogs();
+    }catch(e){ tbody.innerHTML = `<tr><td colspan="9" class="center error">Failed to load logs.</td></tr>`; }
+  }
+  function renderLogs(){
+    const t = s => (s==null||s==="")?"":String(s);
+    const q = search.value.trim().toLowerCase(), tf = typeFilter.value.trim().toLowerCase(), cf = courseFilter.value.trim().toLowerCase();
+    const rows = allRows.filter(r=>{
+      const okType = !tf || t(r.type).toLowerCase()===tf;
+      const okCourse = !cf || t(r.course).toLowerCase().includes(cf);
+      const text = (t(r.name)+" "+t(r.ua)+" "+t(r.page)+" "+t(r.company)).toLowerCase();
+      return okType && okCourse && (!q || text.includes(q));
+    });
+    rowCount.textContent = String(rows.length);
+    if (!rows.length){ tbody.innerHTML = `<tr><td colspan="9" class="center muted">No rows.</td></tr>`; return; }
+    tbody.innerHTML = rows.map(r=>`
+      <tr>
+        <td>${r.ts_server||''}</td><td>${r.type||''}</td><td>${r.name||''}</td><td>${r.course||''}</td>
+        <td>${r.company||''}</td><td>${r.ts_client||''}</td><td>${r.page||''}</td>
+        <td class="muted">${r.ua||''}</td><td><code style="font-size:.85rem">${r.videos_json||''}</code></td>
+      </tr>`).join('');
+  }
+  typeFilter.addEventListener('change', renderLogs);
+  courseFilter.addEventListener('input', renderLogs);
+  search.addEventListener('input', renderLogs);
+
+  if(sessionStorage.getItem(ADMIN_OK_KEY) === "true"){ showApp(); }
   </script>
 </body>
 </html>
