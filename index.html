@@ -6,7 +6,7 @@
   <title>Training Portal</title>
   <meta name="color-scheme" content="dark">
   <style>
-    :root{ --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --accentA:#22d3ee; --accentB:#3b82f6; --border:rgba(255,255,255,.08);}
+    :root{--bg:#0b1020;--card:#131a2a;--muted:#92a0b8;--fg:#e9edf5;--accentA:#22d3ee;--accentB:#3b82f6;--border:rgba(255,255,255,.08);}
     *,*::before,*::after{box-sizing:border-box}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";background:var(--bg);color:var(--fg);min-height:100vh}
     header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
@@ -19,14 +19,14 @@
     .btnLink{background:#0e1525;color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
     main{max-width:900px;margin:28px auto;padding:0 16px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    h2{margin:0 0 4px 0;text-align:center}
-    p.sub{margin:0 0 22px 0;color:var(--muted);text-align:center}
+    h2{text-align:center;margin:0 0 6px}
+    p.sub{text-align:center;margin:0 0 22px;color:var(--muted)}
     label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
     input{width:100%;border-radius:12px;border:1px solid var(--border);background:#0e1525;color:var(--fg);padding:10px 12px;outline:none}
     .row{display:flex;justify-content:center;margin-top:14px}
     .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:10px 22px;border-radius:12px;cursor:pointer}
     .err{color:#f87171;font-weight:700;text-align:center;margin-top:10px;min-height:20px}
-    footer{margin:40px 0 20px;text-align:center;color:var(--muted)}
+    footer{text-align:center;margin:40px 0 20px;color:var(--muted)}
   </style>
 </head>
 <body>
@@ -42,66 +42,50 @@
     <section class="card">
       <h2>Training Series</h2>
       <p class="sub">Enter your name and your 10-character access code.</p>
-
       <label>Your name</label>
       <input id="name" placeholder="Jane Doe" autocomplete="off"/>
-
       <label>Access code</label>
-      <input id="code" placeholder="XXXXXXXXXX" autocomplete="off" maxlength="20" />
-
+      <input id="code" placeholder="XXXXXXXXXX" autocomplete="off" maxlength="20"/>
       <div class="row"><button id="enterBtn" class="btn">Enter</button></div>
       <div id="err" class="err"></div>
     </section>
     <footer>© 2025 Training</footer>
   </main>
 
+  <!-- Config -->
+  <script src="config.js"></script>
   <script>
-  // ===== set this to your current Apps Script /exec URL =====
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxuPTsJ2ZNV2PLmTFEmYQsHza7P4mFOgnfNFgjGz-3NFgwa1RU_4fcjwskW9AAfEDrB/exec";
-
+  const { SCRIPT_URL } = window.APP_CONFIG || {};
   const err = document.getElementById('err');
   const btn = document.getElementById('enterBtn');
 
-  // Simple helper to log sign-in (POST text/plain avoids preflight)
   async function logEvent(payload){
     try{
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      });
+      await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});
     }catch(_){}
   }
 
   btn.addEventListener('click', async ()=>{
-    err.textContent = '';
-    const name = document.getElementById('name').value.trim();
-    const code = document.getElementById('code').value.trim().toUpperCase();
-    if (!name || !code) { err.textContent = 'Please enter your name and code.'; return; }
+    err.textContent='';
+    const name=document.getElementById('name').value.trim();
+    const code=document.getElementById('code').value.trim().toUpperCase();
+    if(!name||!code){err.textContent='Please enter your name and code.';return;}
 
     try{
-      // ✅ GET for validation (no CORS preflight)
-      const url = `${SCRIPT_URL}?mode=validate&code=${encodeURIComponent(code)}`;
-      const res = await fetch(url);
-      const text = await res.text();
-      let data = null; try { data = JSON.parse(text); } catch {}
+      const url=`${SCRIPT_URL}?mode=validate&code=${encodeURIComponent(code)}`;
+      const res=await fetch(url);
+      const text=await res.text();
+      let data;try{data=JSON.parse(text);}catch{}
+      if(!res.ok||!data){err.textContent='Server error. Please try again.';return;}
+      if(!data.ok){err.textContent=data.error||'Invalid code.';return;}
 
-      if (!res.ok || !data) { err.textContent = 'Server error. Please try again.'; return; }
-      if (!data.ok)        { err.textContent = data.error || 'Invalid code.'; return; }
+      sessionStorage.setItem('tv_name',name);
+      sessionStorage.setItem('tv_course',data.course);
+      sessionStorage.setItem('tv_company',data.company||'');
 
-      // Persist who/what for videos page
-      sessionStorage.setItem('tv_name', name);
-      sessionStorage.setItem('tv_course', data.course);    // agent / supervisor / admin
-      sessionStorage.setItem('tv_company', data.company || '');
-
-      // Optional: log the sign-in
-      logEvent({ type:'signin', name, course:data.course, ts:Date.now(), page:'index', ua:navigator.userAgent, company:data.company||'' });
-
-      // Go to playlist
-      location.href = 'videos.html';
-    }catch(e){
-      err.textContent = 'Server error. Please try again.';
-    }
+      logEvent({type:'signin',name,course:data.course,company:data.company||'',page:'index',ua:navigator.userAgent,ts:Date.now()});
+      location.href='videos.html';
+    }catch(e){err.textContent='Server error. Please try again.';}
   });
   </script>
 </body>
