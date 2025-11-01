@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Training Admin</title>
+  <meta name="color-scheme" content="dark">
+  <style>
+    :root{
+      --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
+      --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08);
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+         background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--fg)}
+    header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .wrap{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+    .brand{font-weight:800;letter-spacing:.2px}
+    .logo{height:36px}
+    main{max-width:1100px;margin:28px auto;padding:0 16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    input,select{border-radius:10px;border:1px solid var(--border);background:#0e1525;color:var(--fg);padding:10px 12px;outline:none}
+    .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer}
+    .btn.secondary{background:#0e1525;color:var(--fg);border:1px solid var(--border)}
+    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:12px;min-width:900px}
+    th,td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+    th{position:sticky;top:0;background:#0e1525;z-index:1}
+    .muted{color:var(--muted)}
+    .pill{font-size:.85rem;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#0e1525}
+    .center{display:flex;align-items:center;justify-content:center;min-height:220px}
+    .error{color:#f87171;font-weight:700}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">Training Admin</div>
+      <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo"/>
+    </div>
+  </header>
+
+  <main>
+    <!-- Admin sign-in -->
+    <section id="gate" class="card">
+      <div class="row">
+        <label for="adminPass" class="muted">Admin password</label>
+        <input id="adminPass" type="password" placeholder="Enter admin password"/>
+        <button id="adminBtn" class="btn">Sign in</button>
+        <div id="gateErr" class="error" style="margin-left:8px"></div>
+      </div>
+    </section>
+
+    <!-- Controls + table -->
+    <section id="panel" class="card" style="display:none">
+      <div class="row" style="justify-content:space-between">
+        <div class="row">
+          <span class="pill">Rows: <span id="rowCount">0</span></span>
+          <select id="typeFilter">
+            <option value="">All types</option>
+            <option value="signin">signin</option>
+            <option value="completion">completion</option>
+          </select>
+          <input id="courseFilter" placeholder="Course (e.g., agent)"/>
+          <input id="search" placeholder="Search name/UA/page"/>
+          <button id="refresh" class="btn secondary">Refresh</button>
+          <button id="downloadCsv" class="btn secondary">Download CSV</button>
+        </div>
+        <button id="logout" class="btn">Log out</button>
+      </div>
+
+      <div style="overflow:auto">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>ts_server</th>
+              <th>type</th>
+              <th>name</th>
+              <th>course</th>
+              <th>ts_client</th>
+              <th>page</th>
+              <th>ua</th>
+              <th>videos_json</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="8" class="center muted">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  // === CONFIG ===
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWftfQypoGfeZLQZGX8tE5JdlNQzLsAvG3Vo7tVEqm_LWh50H6flr962FCVcyUcXAe/exec";
+  const ADMIN_TOKEN = "CHANGE_ME_ADMIN_TOKEN"; // must match SECRET_TOKEN in Apps Script
+  const ADMIN_PASS  = "cooladmin";            // UI gate
+
+  // === Admin gate ===
+  const gate = document.getElementById('gate');
+  const panel = document.getElementById('panel');
+  const gateErr = document.getElementById('gateErr');
+
+  const ADMIN_OK_KEY = "training_admin_ok";
+  function showPanel(){ gate.style.display='none'; panel.style.display=''; loadData(); }
+  function showGate(){ panel.style.display='none'; gate.style.display=''; }
+
+  document.getElementById('adminBtn').addEventListener('click', ()=>{
+    const val = document.getElementById('adminPass').value;
+    gateErr.textContent = "";
+    if(val === ADMIN_PASS){
+      sessionStorage.setItem(ADMIN_OK_KEY, "true");
+      showPanel();
+    }else{
+      gateErr.textContent = "Incorrect password.";
+    }
+  });
+  document.getElementById('logout').addEventListener('click', ()=>{
+    sessionStorage.removeItem(ADMIN_OK_KEY); showGate();
+  });
+  if(sessionStorage.getItem(ADMIN_OK_KEY) === "true"){ showPanel(); }
+
+  // === Data + Table ===
+  const tbody = document.getElementById('tbody');
+  const rowCount = document.getElementById('rowCount');
+  const typeFilter = document.getElementById('typeFilter');
+  const courseFilter = document.getElementById('courseFilter');
+  const search = document.getElementById('search');
+  const refresh = document.getElementById('refresh');
+  const downloadCsv = document.getElementById('downloadCsv');
+
+  let allRows = [];
+
+  async function loadData(){
+    tbody.innerHTML = `<tr><td colspan="8" class="center muted">Loading…</td></tr>`;
+    try{
+      const url = `${SCRIPT_URL}?mode=json&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=2000`;
+      const res = await fetch(url, { method:'GET' });
+      const data = await res.json();
+      allRows = (data && data.rows) ? data.rows : [];
+      render();
+    }catch(e){
+      tbody.innerHTML = `<tr><td colspan="8" class="center error">Failed to load data.</td></tr>`;
+    }
+  }
+
+  function render(){
+    const t = (s)=> (s==null || s==="") ? "" : String(s);
+    const q = search.value.trim().toLowerCase();
+    const tf = typeFilter.value.trim().toLowerCase();
+    const cf = courseFilter.value.trim().toLowerCase();
+
+    const rows = allRows.filter(r=>{
+      const okType = !tf || t(r.type).toLowerCase() === tf;
+      const okCourse = !cf || t(r.course).toLowerCase().includes(cf);
+      const text = (t(r.name) + " " + t(r.ua) + " " + t(r.page)).toLowerCase();
+      const okQ = !q || text.includes(q);
+      return okType && okCourse && okQ;
+    });
+
+    rowCount.textContent = rows.length.toString();
+
+    if (!rows.length){
+      tbody.innerHTML = `<tr><td colspan="8" class="center muted">No rows.</td></tr>`;
+      return;
+    }
+
+    const html = rows.map(r=>{
+      const safe = (v)=> v==null ? "" : String(v);
+      return `<tr>
+        <td>${safe(r.ts_server)}</td>
+        <td>${safe(r.type)}</td>
+        <td>${safe(r.name)}</td>
+        <td>${safe(r.course)}</td>
+        <td>${safe(r.ts_client)}</td>
+        <td>${safe(r.page)}</td>
+        <td class="muted">${safe(r.ua)}</td>
+        <td><code style="font-size:.85rem">${safe(r.videos_json)}</code></td>
+      </tr>`;
+    }).join('');
+
+    tbody.innerHTML = html;
+  }
+
+  typeFilter.addEventListener('change', render);
+  courseFilter.addEventListener('input', render);
+  search.addEventListener('input', render);
+  refresh.addEventListener('click', loadData);
+
+  downloadCsv.addEventListener('click', ()=>{
+    const url = `${SCRIPT_URL}?mode=csv&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=5000`;
+    const a = document.createElement('a');
+    a.href = url; a.download = 'training_logs.csv'; a.click();
+  });
+  </script>
+</body>
+</html>
