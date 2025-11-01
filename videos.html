@@ -10,7 +10,10 @@
   <main class="card">
     <header class="row">
       <h1>Training Videos</h1>
-      <button id="logout">Log out</button>
+      <nav class="row" style="gap:.75rem">
+        <a id="contact" class="link" href="#">Contact</a>
+        <button id="logout">Log out</button>
+      </nav>
     </header>
 
     <p>Welcome, <strong id="who"></strong>!</p>
@@ -19,9 +22,8 @@
     <section class="videos">
       <article class="video">
         <h2>Module 1 — Introduction</h2>
-        <!-- Use your own MP4s (large repo) or embed from YouTube/Vimeo (lighter). -->
-        <!-- Example YouTube embed: -->
         <div class="embed">
+          <!-- Replace VIDEO_ID with your video -->
           <iframe width="560" height="315"
                   src="https://www.youtube.com/embed/VIDEO_ID"
                   title="Module 1"
@@ -51,7 +53,14 @@
     // Personalize with the stored name
     document.getElementById('who').textContent = sessionStorage.getItem('visitorName') || "guest";
 
-    // Logout button clears session and returns to gate
+    // Contact link targets Kenley's email
+    const EMAIL_OWNER = "Kenley.richardson@gmail.com";
+    document.getElementById('contact').setAttribute(
+      'href',
+      `mailto:${encodeURIComponent(EMAIL_OWNER)}?subject=${encodeURIComponent('Question about training videos')}`
+    );
+
+    // Logout clears session
     document.getElementById('logout').addEventListener('click', () => {
       sessionStorage.removeItem('authed');
       sessionStorage.removeItem('visitorName');
