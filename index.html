@@ -17,6 +17,8 @@
     .wrap{max-width:1000px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
     .brand{font-weight:800;letter-spacing:.2px}
     .logo{height:36px}
+    .btnLink{background:#0e1525;color:var(--fg);border:1px solid var(--border);
+             font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
     main{max-width:820px;margin:28px auto;padding:0 16px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.25);}
     h1{margin:0 0 .35rem;font-size:1.6rem}
@@ -35,7 +37,10 @@
 <body>
   <header>
     <div class="wrap">
-      <div class="brand">Training Portal</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="brand">Training Portal</div>
+        <a class="btnLink" href="admin.html">Admin</a>
+      </div>
       <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo" />
     </div>
   </header>
@@ -59,19 +64,17 @@
   <footer>© <span id="yr"></span> Training</footer>
 
   <script>
-  // --- Password → Course mapping ---
+  // Password → Course
   const PASSWORDS = {
     "coolagent": "agent",
     "coolsup":   "supervisor",
     "cooladmin": "admin"
   };
 
-  // --- New webhook URL (sign-ins) ---
-  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxTv054rCXx409lO9x-uUeqm1qtgcLeLWTiY8lWrYq-740bgp2M6gbDV0_ucZRDegA9/exec";
+  // NEW webhook URL (sign-ins)
+  const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzWftfQypoGfeZLQZGX8tE5JdlNQzLsAvG3Vo7tVEqm_LWh50H6flr962FCVcyUcXAe/exec";
 
-  // --- Local storage keys ---
   const AUTH_KEY="training_authed", NAME_KEY="training_visitor_name";
-
   document.getElementById("yr").textContent=new Date().getFullYear();
 
   document.getElementById("gateForm").addEventListener("submit", (e) => {
@@ -86,22 +89,20 @@
     const course = PASSWORDS[pass];
     if (!course){ errorEl.textContent = "Incorrect password. Please try again."; return; }
 
-    // mark authed
     localStorage.setItem(AUTH_KEY, "true");
     localStorage.setItem(NAME_KEY, name);
 
-    // ping webhook (type=signin)
+    // signin webhook
     try{
       fetch(WEBHOOK_URL, {
         method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
         body: JSON.stringify({
           type:"signin", name, course, ts:new Date().toISOString(),
-          ua: navigator.userAgent, page: location.href
+          ua:navigator.userAgent, page:location.href
         })
       });
     }catch(_){}
 
-    // go to videos.html with course
     location.href = new URL(`videos.html?course=${encodeURIComponent(course)}`, location.href).toString();
   });
   </script>
