@@ -1,174 +1,156 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Training Videos</title>
-  <meta name="color-scheme" content="dark light">
-  <style>
-    :root{ --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08) }
-    [data-theme="light"]{ --bg:#f7fafc; --card:#ffffff; --muted:#5b697d; --fg:#0b1020; --input:#f8fafc; --border:rgba(0,0,0,.08) }
-    *,*::before,*::after{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";background:var(--bg);color:var(--fg);min-height:100vh}
-    header{padding:14px 18px;border-bottom:1px solid var(--border)}
-    .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
-    .left{justify-self:start}
-    .center{justify-self:center;text-align:center}
-    .right{justify-self:end;display:flex;gap:12px;align-items:center}
-    .brand{font-weight:800;letter-spacing:.2px;font-size:1.1rem}
-    .logo{height:36px}
-    .btnLink{background:var(--input);color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
-    .pill{font-size:.85rem;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--input);cursor:pointer}
-
-    main{max-width:1100px;margin:28px auto;padding:0 16px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .videoWrap{margin-top:12px}
-    video{width:100%;max-height:520px;border-radius:12px;border:1px solid var(--border);background:#000}
-    ul{list-style:none;padding:0;margin:0}
-    li{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:10px;margin-top:8px;background:var(--input)}
-    .muted{color:var(--muted)}
-    .badge{font-size:.75rem;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:transparent}
-    .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:8px 14px;border-radius:10px;cursor:pointer}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Training Videos</title>
+<meta name="color-scheme" content="dark light">
+<style>
+:root{
+  --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
+  --input:#0e1525; --border:rgba(255,255,255,.08); --accentA:#22d3ee; --accentB:#3b82f6;
+}
+:root[data-theme="light"]{ --bg:#f6f7fb; --bg2:#eef2f8; --card:#ffffff; --fg:#0f172a; --input:#f3f4f6; --border:rgba(15,23,42,.12); --muted:#64748b; }
+*{box-sizing:border-box} body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--fg);min-height:100vh;}
+header{padding:14px 18px;border-bottom:1px solid var(--border)}
+.hgrid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.left{justify-self:start}.center{justify-self:center}.right{justify-self:end}
+.brand{font-weight:800;letter-spacing:.2px}
+.btnLink{background:var(--input);color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
+.toggle{border:1px solid var(--border);background:var(--input);padding:6px 10px;border-radius:999px;cursor:pointer}
+main{max-width:1100px;margin:24px auto;padding:0 16px}
+.grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+h2{margin:6px 0 12px 0}
+.video{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px}
+li{list-style:none;margin:0;padding:0}
+.item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--input);margin-bottom:8px;cursor:pointer}
+.item.active{outline:2px solid var(--accentB)}
+.badge{font-size:.8rem;color:var(--muted)}
+</style>
+<script src="config.js?v=31"></script>
+<script>
+(function themeBoot(){
+  const saved = localStorage.getItem('tp_theme');
+  if(saved) document.documentElement.setAttribute('data-theme', saved);
+})();
+</script>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <div class="left"><a class="btnLink" href="home.html">← Back</a></div>
-      <div class="center"><div class="brand" id="title">Training Videos</div></div>
-      <div class="right">
-        <span class="pill" id="themeToggle">Dark</span>
-        <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo"/>
-      </div>
+<header>
+  <div class="hgrid">
+    <div class="left"><a class="btnLink" href="home.html">← Back</a></div>
+    <div class="center"><div class="brand">Training Videos</div></div>
+    <div class="right">
+      <button id="themeBtn" class="toggle">Dark</button>
+      <img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="Logo" style="height:36px;margin-left:8px">
     </div>
-  </header>
+  </div>
+</header>
 
-  <main>
-    <div class="card">
-      <div class="row" style="justify-content:space-between">
-        <div>
-          <div id="hello" class="muted"></div>
-          <div id="courseHint" class="muted"></div>
-        </div>
-        <button id="restartBtn" class="btn">Restart course</button>
-      </div>
+<main>
+  <div class="grid">
+    <section class="card">
+      <h2 id="courseTitle"></h2>
+      <video id="player" class="video" controls playsinline></video>
+    </section>
+    <section class="card">
+      <h2>Playlist</h2>
+      <ul id="list" style="margin:0;padding:0"></ul>
+    </section>
+  </div>
+</main>
 
-      <div class="videoWrap">
-        <video id="player" controls playsinline></video>
-      </div>
+<script>
+const cfg = window.APP_CONFIG;
+document.getElementById('themeBtn').addEventListener('click', ()=>{
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  const nxt = cur==='dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', nxt);
+  localStorage.setItem('tp_theme', nxt);
+  document.getElementById('themeBtn').textContent = nxt==='dark'?'Dark':'Light';
+});
+document.getElementById('themeBtn').textContent =
+  (document.documentElement.getAttribute('data-theme')||'dark')==='dark'?'Dark':'Light';
 
-      <h3 style="margin:16px 0 6px">Playlist</h3>
-      <ul id="list"></ul>
-    </div>
-  </main>
+const user = (()=>{ try{ return JSON.parse(sessionStorage.getItem('tp_user')||'null'); }catch{ return null; }})();
+if(!user) { location.href='home.html'; }
 
-  <script src="config.js"></script>
-  <script>
-    // Theme toggle
-    (function(){
-      const key='training_theme', root=document.documentElement, t=document.getElementById('themeToggle');
-      const apply = m => { if(m==='light'){ root.setAttribute('data-theme','light'); t.textContent='Light'; } else { root.removeAttribute('data-theme'); t.textContent='Dark'; } };
-      let m=localStorage.getItem(key)||'dark'; apply(m);
-      t.addEventListener('click',()=>{ m=(m==='dark')?'light':'dark'; localStorage.setItem(key,m); apply(m); });
-    })();
+/* Define course playlists (adjust paths/names as in your repo) */
+function playlistFor(course){
+  if(course==='agent'){
+    return [
+      { title:'Agent login',         src:'AgentVideos/Agent%20Login%20(Desktop).mp4' },
+      { title:'Profile settings',    src:'AgentVideos/Profiles%20Settings.mp4' },
+      { title:'Agent state',         src:'AgentVideos/Agent%20State.mp4' },
+      { title:'Outbound calling',    src:'AgentVideos/Outbound%20Calling.mp4' },
+      { title:'Side navigation',     src:'AgentVideos/Side%20Navigation.mp4' },
+      { title:'Sign out',            src:'AgentVideos/Sign%20Out.mp4' }
+    ];
+  }
+  if(course==='supervisor'){
+    return [
+      { title:'Supervisor intro', src:'SupVideos/IMG_3339.mov' }
+    ];
+  }
+  if(course==='admin'){
+    return [
+      { title:'Admin intro', src:'AdminVideos/intro.mp4' }
+    ];
+  }
+  return [];
+}
 
-    const SCRIPT_URL = window.APP_CONFIG?.SCRIPT_URL || '';
+const vids = playlistFor(user.course);
+const list = document.getElementById('list');
+const player = document.getElementById('player');
+const courseTitle = document.getElementById('courseTitle');
+courseTitle.textContent = `${user.company} — ${user.course.charAt(0).toUpperCase()+user.course.slice(1)} Training`;
 
-    // Define course playlists (edit paths as needed)
-    const VIDEOS = {
-      agent: [
-        { title:'Agent Login (Desktop)', src:'AgentVideos/Agent%20Login%20(Desktop).mp4' },
-        { title:'Profiles Settings',     src:'AgentVideos/Profiles%20Settings.mp4' },
-        { title:'Agent State',           src:'AgentVideos/Agent%20State.mp4' },
-        { title:'Outbound Calling',      src:'AgentVideos/Outbound%20Calling.mp4' },
-        { title:'Side Navigation',       src:'AgentVideos/Side%20Navigation.mp4' },
-        { title:'Sign Out',              src:'AgentVideos/Sign%20Out.mp4' }
-      ],
-      supervisor: [
-        { title:'Supervisor Intro', src:'SupVideos/IMG_3339.mov' }
-      ],
-      admin: [
-        { title:'Admin Intro', src:'AdminVideos/Admin%20Intro.mp4' }
-      ]
-    };
+let idx = 0, finished = new Array(vids.length).fill(false), jumping = false;
 
-    const url = new URLSearchParams(location.search);
-    const name = url.get('name') || 'User';
-    const course = (url.get('course') || 'agent').toLowerCase();
-    const company = url.get('company') || '';
-
-    document.getElementById('hello').textContent = `Welcome, ${name}${company ? ' • ' + company : ''}`;
-    const titleEl = document.getElementById('title');
-    const courseHint = document.getElementById('courseHint');
-    titleEl.textContent = (course==='agent'?'Agent':course==='supervisor'?'Supervisor':'Admin') + ' Training';
-    courseHint.textContent = 'Your videos will play one after another.';
-
-    const listEl = document.getElementById('list');
-    const player = document.getElementById('player');
-    const restartBtn = document.getElementById('restartBtn');
-
-    const playlist = VIDEOS[course] || [];
-    let index = 0;
-
-    function renderList() {
-      listEl.innerHTML = playlist.map((v,i)=>`
-        <li>
-          <span>${i+1}. ${v.title}</span>
-          <span class="badge" data-i="${i}">${i<index?'Completed':i===index?'Now playing':'Pending'}</span>
-        </li>
-      `).join('');
-      listEl.querySelectorAll('.badge').forEach(b=>{
-        b.addEventListener('click', ()=>{ index = Number(b.getAttribute('data-i')); loadCurrent(); });
-      });
-    }
-
-    function loadCurrent() {
-      const item = playlist[index];
-      if (!item) return;
-      player.src = item.src;
-      renderList();
-    }
-
-    function logCompletion(item) {
-      // Send a completion event with the finished video’s title
-      fetch(SCRIPT_URL, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          mode:'completion',
-          name, course,
-          ts_client: Date.now(),
-          page:'videos',
-          ua: navigator.userAgent,
-          company,
-          videos_json: { index, title: item.title, src: item.src }
-        })
-      });
-    }
-
-    player.addEventListener('ended', ()=>{
-      const item = playlist[index];
-      if (item) logCompletion(item);
-      index++;
-      if (index < playlist.length) {
-        loadCurrent();
-        player.play().catch(()=>{});
-      } else {
-        renderList();
-        alert('All videos completed. Great job!');
-      }
+function renderList(){
+  list.innerHTML = vids.map((v,i)=>`
+    <li class="item ${i===idx?'active':''}" data-i="${i}">
+      <span>${i+1}. ${v.title}</span>
+      <span class="badge">${finished[i]?'done':''}</span>
+    </li>`).join('');
+  list.querySelectorAll('.item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const i = Number(el.getAttribute('data-i'));
+      if(i===idx) { player.currentTime = 0; player.play(); return; }
+      idx = i; loadCurrent(true);
     });
-
-    restartBtn.addEventListener('click', ()=>{
-      index = 0;
-      loadCurrent();
-      player.play().catch(()=>{});
-    });
-
-    // init
-    renderList();
-    loadCurrent();
-  </script>
+  });
+}
+function loadCurrent(autoplay){
+  jumping = true;
+  player.src = vids[idx].src;
+  player.currentTime = 0;
+  if(autoplay) player.play();
+  renderList();
+  setTimeout(()=> jumping=false, 200); // guard against spurious "ended" on some mobiles
+}
+player.addEventListener('ended', ()=>{
+  if(jumping) return;
+  finished[idx] = true;
+  const allDone = finished.every(Boolean);
+  if(allDone){
+    // send completion once
+    const videos_json = vids.map((v,i)=>({ index:i, title:v.title, src:v.src }));
+    fetch(cfg.SCRIPT_URL, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode:'completion', name:user.name, course:user.course, company:user.company,
+        ts_client: Date.now(), page:'videos', ua:navigator.userAgent, videos_json
+      })
+    }).catch(()=>{});
+  }
+  if(idx < vids.length-1){ idx++; loadCurrent(true); }
+});
+loadCurrent(false);
+renderList();
+</script>
 </body>
 </html>
