@@ -9,10 +9,9 @@
     :root{ --bg:#0b1020; --bg2:#0a132a; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08); }
     *,*::before,*::after{box-sizing:border-box}
     body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans"; background:linear-gradient(180deg,var(--bg),var(--bg2)); color:var(--fg)}
-    /* New header layout */
     header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
     .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
-    .left{justify-self:start;display:flex;gap:10px}
+    .left{justify-self:start}
     .center{justify-self:center;text-align:center}
     .right{justify-self:end}
     .brand{font-weight:800;letter-spacing:.2px;font-size:1.1rem}
@@ -28,7 +27,7 @@
     input:focus{box-shadow:0 0 0 3px rgba(59,130,246,.25)}
     .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d; font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer;margin-top:12px;width:120px}
     .btn:active{transform:translateY(1px)}
-    .error{color:#f87171;font-weight:700;margin-top:.75rem;text-align:center}
+    .error{color:#f87171;font-weight:700;margin-top:.75rem;text-align:center;min-height:1.2em}
     footer{color:#93a3ba;text-align:center;font-size:.85rem;padding:18px}
   </style>
 </head>
@@ -62,10 +61,8 @@
   <footer>© <span id="yr"></span> Training</footer>
 
   <script>
-  const AUTH_KEY="training_authed", NAME_KEY="training_visitor_name", COMPANY_KEY="training_company";
+  // === CONFIG: make sure this matches the admin page ===
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuTjMnhZbFd_sMhJJUZUBw-UlAXpRRlXkYXH7dlJvwr0Bz9mjk_8X-YPveB58WP58c/exec";
-  const WEBHOOK_URL = SCRIPT_URL;
-
   document.getElementById("yr").textContent=new Date().getFullYear();
 
   document.getElementById("gateForm").addEventListener("submit", async (e) => {
@@ -79,23 +76,42 @@
 
     try{
       const res = await fetch(SCRIPT_URL, {
-        method:"POST", headers:{"Content-Type":"application/json"},
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ mode:"validate", code })
       });
-      const data = await res.json();
-      if (!data.ok){ errorEl.textContent = "Invalid or inactive code."; return; }
-      const course = data.course; const company = data.company || "";
 
-      localStorage.setItem(AUTH_KEY, "true");
-      localStorage.setItem(NAME_KEY, name);
-      localStorage.setItem(COMPANY_KEY, company);
+      // Try to parse JSON; if it fails, show raw text to help debug
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { data = null; }
 
-      fetch(WEBHOOK_URL, {
-        method:"POST", mode:"no-cors", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({ type:"signin", name, course, company, ts:new Date().toISOString(), ua:navigator.userAgent, page:location.href })
-      });
+      if (!res.ok || !data) {
+        errorEl.textContent = raw || "Server error. Please try again.";
+        return;
+      }
+      if (!data.ok){
+        errorEl.textContent = data.error || "Invalid or inactive code.";
+        return;
+      }
 
-      location.href = new URL(`videos.html?course=${encodeURIComponent(course)}`, location.href).toString();
+      const course  = data.course;
+      const company = data.company || "";
+
+      // Save a single, shared session object for videos.html
+      sessionStorage.setItem('tp_user', JSON.stringify({ name, course, company }));
+
+      // Fire-and-forget signin log
+      fetch(SCRIPT_URL, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          mode:"signin", name, course, company,
+          ts_client: new Date().toISOString(),
+          ua:navigator.userAgent, page:"index"
+        })
+      }).catch(()=>{});
+
+      location.href = "videos.html";
     }catch(err){
       errorEl.textContent = "Server error. Please try again.";
     }
