@@ -1,7 +1,7 @@
 // Global config used by all pages
 window.APP_CONFIG = {
   // Paste your live Web App (exec) URL from Apps Script Deploy > Manage deployments
-  SCRIPT_URL: "https://script.google.com/macros/s/PASTE_FULL_ID_HERE/exec",
+  SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwawMz0Vgg4PSp7sZ0cWCYkEWtEL_fDunaimL5MbmjxC05QIshFdmPcedH0y6Gctu_V/exec",
 
   // Must match SECRET_TOKEN in Apps Script
   ADMIN_TOKEN: "CXASTrainingPortal25",
