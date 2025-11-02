@@ -1,87 +1,63 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Training Admin</title>
-  <meta name="color-scheme" content="dark">
-  <style>
-    :root{
-      --bg:#0b1020;        /* SOLID background to remove bands */
-      --card:#131a2a;
-      --muted:#92a0b8;
-      --fg:#e9edf5;
-      --accentA:#22d3ee;
-      --accentB:#3b82f6;
-      --input:#0e1525;
-      --border:rgba(255,255,255,.08);
-    }
-    *,*::before,*::after{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
-      background:var(--bg);      /* <— solid, no gradient */
-      color:var(--fg);
-      min-height:100vh;
-    }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Training Admin</title>
+<meta name="color-scheme" content="dark">
+<style>
+  :root{
+    --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
+    --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08);
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
+    background:var(--bg); color:var(--fg); min-height:100%;
+  }
 
-    /* Header: Back • Title • Logo */
-    header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
-    .wrap{
-      max-width:1100px;margin:0 auto;
-      display:grid;grid-template-columns:1fr auto 1fr;align-items:center
-    }
-    .left{justify-self:start}
-    .center{justify-self:center;text-align:center}
-    .right{justify-self:end}
-    .brand{font-weight:800;letter-spacing:.2px;font-size:1.1rem}
-    .logo{height:36px}
-    .btnLink{
-      background:var(--input);color:var(--fg);border:1px solid var(--border);
-      font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none
-    }
+  /* Header */
+  header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+  .left{justify-self:start}
+  .center{justify-self:center;text-align:center}
+  .right{justify-self:end}
+  .brand{font-weight:800;letter-spacing:.2px;font-size:1.1rem}
+  .logo{height:36px}
+  .btnLink{background:var(--input);color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
 
-    main{max-width:1100px;margin:28px auto;padding:0 16px}
-    .card{
-      background:var(--card);border:1px solid var(--border);border-radius:18px;
-      padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);
-    }
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    input,select{
-      border-radius:10px;border:1px solid var(--border);
-      background:var(--input);color:var(--fg);padding:10px 12px;outline:none
-    }
-    .btn{
-      background:linear-gradient(135deg,var(--accentA),var(--accentB));
-      border:none;color:#06111d;font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer
-    }
-    .btn.secondary{background:var(--input);color:var(--fg);border:1px solid var(--border)}
-    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:12px;min-width:900px}
-    th,td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
-    th{position:sticky;top:0;background:#0e1525;z-index:1}
-    .muted{color:var(--muted)}
-    .pill{font-size:.85rem;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#0e1525}
-    .centerBox{display:flex;justify-content:center}
-    .error{color:#f87171;font-weight:700}
-  </style>
+  main{max-width:1100px;margin:28px auto;padding:0 16px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  input,select{border-radius:10px;border:1px solid var(--border);background:var(--input);color:var(--fg);padding:10px 12px;outline:none}
+  .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer}
+  .btn.secondary{background:var(--input);color:var(--fg);border:1px solid var(--border)}
+  table{width:100%;border-collapse:separate;border-spacing:0;margin-top:12px;min-width:900px}
+  th,td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+  th{position:sticky;top:0;background:#0e1525;z-index:1}
+  .muted{color:var(--muted)}
+  .pill{font-size:.85rem;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#0e1525}
+  .centerBox{display:flex;justify-content:center}
+  .error{color:#f87171;font-weight:700}
+</style>
 </head>
 <body>
   <header>
     <div class="wrap">
       <div class="left"><a class="btnLink" href="home.html">← Back</a></div>
       <div class="center"><div class="brand">Training Admin</div></div>
-      <div class="right"><img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo"/></div>
+      <div class="right"><img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo"></div>
     </div>
   </header>
 
   <main>
-    <!-- Admin gate (no caching; password prompt every visit) -->
+    <!-- Gate: ALWAYS prompt; no caching -->
     <section id="gate" class="card">
       <div class="centerBox">
         <div class="row">
           <label for="adminPass" class="muted">Admin password</label>
-          <input id="adminPass" type="password" placeholder="Enter admin password"
-                 autocomplete="off" autocapitalize="off" spellcheck="false"/>
+          <input id="adminPass" type="password" placeholder="Enter admin password" autocomplete="off" autocapitalize="off" spellcheck="false">
           <button id="adminBtn" class="btn">Sign in</button>
         </div>
       </div>
@@ -99,47 +75,39 @@
       </div>
       <div style="overflow:auto">
         <table>
-          <thead>
-            <tr><th>Company</th><th>Agent code</th><th>Supervisor code</th><th>Admin code</th><th>Active</th><th>Created</th></tr>
-          </thead>
+          <thead><tr><th>Company</th><th>Agent code</th><th>Supervisor code</th><th>Admin code</th><th>Active</th><th>Created</th></tr></thead>
           <tbody id="custBody"><tr><td colspan="6" style="padding:18px" class="muted">Loading…</td></tr></tbody>
         </table>
       </div>
     </section>
 
     <!-- Logs -->
-    <section id="panel" class="card" style="display:none; margin-top:18px">
+    <section id="panel" class="card" style="display:none;margin-top:18px">
       <div class="row" style="justify-content:space-between">
         <div class="row">
           <span class="pill">Rows: <span id="rowCount">0</span></span>
-          <select id="typeFilter">
-            <option value="">All types</option>
-            <option value="signin">signin</option>
-            <option value="completion">completion</option>
-          </select>
-          <input id="courseFilter" placeholder="Course (e.g., agent)"/>
-          <input id="search" placeholder="Search name/UA/page/company"/>
+          <select id="typeFilter"><option value="">All types</option><option value="signin">signin</option><option value="completion">completion</option></select>
+          <input id="courseFilter" placeholder="Course (e.g., agent)">
+          <input id="search" placeholder="Search name/UA/page/company">
           <button id="refresh" class="btn secondary">Refresh</button>
         </div>
         <button id="logout" class="btn">Log out</button>
       </div>
       <div style="overflow:auto">
         <table id="tbl">
-          <thead>
-            <tr>
-              <th>ts_server</th><th>type</th><th>name</th><th>course</th><th>company</th>
-              <th>ts_client</th><th>page</th><th>ua</th><th>videos_json</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>ts_server</th><th>type</th><th>name</th><th>course</th><th>company</th>
+            <th>ts_client</th><th>page</th><th>ua</th><th>videos_json</th>
+          </tr></thead>
           <tbody id="tbody"><tr><td colspan="9" style="padding:18px" class="muted">Loading…</td></tr></tbody>
         </table>
       </div>
     </section>
   </main>
 
-  <script>
-  // You can centralize these in config.js as window.APP_CONFIG; we’ll respect that if present.
-  const SCRIPT_URL = (window.APP_CONFIG && window.APP_CONFIG.SCRIPT_URL) || "YOUR_APPS_SCRIPT_URL";
+<script>
+  // Use config.js if present; otherwise fill your values here.
+  const SCRIPT_URL  = (window.APP_CONFIG && window.APP_CONFIG.SCRIPT_URL)  || "YOUR_APPS_SCRIPT_URL";
   const ADMIN_TOKEN = (window.APP_CONFIG && window.APP_CONFIG.ADMIN_TOKEN) || "YOUR_ADMIN_TOKEN";
   const ADMIN_PASS  = (window.APP_CONFIG && window.APP_CONFIG.ADMIN_PASS)  || "cooladmin";
 
@@ -151,14 +119,12 @@
   function showApp(){ gate.style.display='none'; customers.style.display=''; panel.style.display=''; loadCustomers(); loadLogs(); }
   function showGate(){ gate.style.display=''; customers.style.display='none'; panel.style.display='none'; }
 
-  // Always require password (no caching).
+  // Always require password (no storage).
   document.getElementById('adminBtn').addEventListener('click', ()=>{
-    const val = document.getElementById('adminPass').value.trim();
-    gateErr.textContent = "";
-    if (val === ADMIN_PASS) showApp();
-    else gateErr.textContent = "Incorrect password.";
+    const v = document.getElementById('adminPass').value.trim();
+    gateErr.textContent = '';
+    if (v === ADMIN_PASS) showApp(); else gateErr.textContent = 'Incorrect password.';
   });
-
   const doLogout = ()=>{ showGate(); document.getElementById('adminPass').value=''; };
   document.getElementById('logout').addEventListener('click', doLogout);
   document.getElementById('logoutTop').addEventListener('click', doLogout);
@@ -169,16 +135,12 @@
   document.getElementById('addCompanyBtn').addEventListener('click', async ()=>{
     const name = prompt('Company name'); if (!name) return;
     try{
-      const res = await fetch(SCRIPT_URL, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ mode:'addCompany', token: ADMIN_TOKEN, company: name })
-      });
+      const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'addCompany', token: ADMIN_TOKEN, company: name }) });
       const text = await res.text();
       let data; try { data = JSON.parse(text); } catch { data = null; }
       if (!res.ok || !data || data.ok !== true) {
-        alert(text === 'UNAUTHORIZED'
-          ? 'Token mismatch or old deployment.\nMake sure ADMIN_TOKEN === SECRET_TOKEN and redeploy.'
-          : 'Server error: ' + text);
+        alert(text === 'UNAUTHORIZED' ? 'Token mismatch or old deployment.\nMake sure ADMIN_TOKEN === SECRET_TOKEN and redeploy.' : 'Server error: ' + text);
         return;
       }
       await loadCustomers();
@@ -192,14 +154,8 @@
       const url = `${SCRIPT_URL}?mode=customers&token=${encodeURIComponent(ADMIN_TOKEN)}`;
       const res = await fetch(url);
       const text = await res.text();
-      if (!res.ok) {
-        custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="error">HTTP ${res.status}<br><code>${text.slice(0,200)}</code></td></tr>`;
-        return;
-      }
-      if (text === 'UNAUTHORIZED') {
-        custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="error">UNAUTHORIZED — set ADMIN_TOKEN to match SECRET_TOKEN and redeploy.</td></tr>`;
-        return;
-      }
+      if (!res.ok) { custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="error">HTTP ${res.status}<br><code>${text.slice(0,200)}</code></td></tr>`; return; }
+      if (text === 'UNAUTHORIZED') { custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="error">UNAUTHORIZED — set ADMIN_TOKEN to match SECRET_TOKEN and redeploy.</td></tr>`; return; }
       const data = JSON.parse(text);
       const rows = (data && data.rows) ? data.rows : [];
       if (!rows.length){ custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="muted">No companies yet.</td></tr>`; return; }
@@ -219,27 +175,17 @@
 
   // ---- Logs ----
   const tbody = document.getElementById('tbody'), rowCount = document.getElementById('rowCount');
-  const typeFilter = document.getElementById('typeFilter'),
-        courseFilter = document.getElementById('courseFilter'),
-        search = document.getElementById('search');
-
+  const typeFilter = document.getElementById('typeFilter'), courseFilter = document.getElementById('courseFilter'), search = document.getElementById('search');
   document.getElementById('refresh').addEventListener('click', loadLogs);
   let allRows = [];
-
   async function loadLogs(){
     tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="muted">Loading…</td></tr>`;
     try{
       const url = `${SCRIPT_URL}?mode=json&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=2000`;
       const res = await fetch(url);
       const text = await res.text();
-      if (!res.ok) {
-        tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="error">HTTP ${res.status}<br><code>${text.slice(0,200)}</code></td></tr>`;
-        return;
-      }
-      if (text === 'UNAUTHORIZED') {
-        tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="error">UNAUTHORIZED — token mismatch.</td></tr>`;
-        return;
-      }
+      if (!res.ok) { tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="error">HTTP ${res.status}<br><code>${text.slice(0,200)}</code></td></tr>`; return; }
+      if (text === 'UNAUTHORIZED') { tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="error">UNAUTHORIZED — token mismatch.</td></tr>`; return; }
       const data = JSON.parse(text);
       allRows = (data && data.rows) ? data.rows : [];
       renderLogs();
@@ -247,12 +193,9 @@
       tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="error">Failed to load logs.</td></tr>`;
     }
   }
-
   function renderLogs(){
     const t = s => (s==null||s==="")?"":String(s);
-    const q = search.value.trim().toLowerCase(),
-          tf = typeFilter.value.trim().toLowerCase(),
-          cf = courseFilter.value.trim().toLowerCase();
+    const q = search.value.trim().toLowerCase(), tf = typeFilter.value.trim().toLowerCase(), cf = courseFilter.value.trim().toLowerCase();
     const rows = allRows.filter(r=>{
       const okType = !tf || t(r.type).toLowerCase()===tf;
       const okCourse = !cf || t(r.course).toLowerCase().includes(cf);
@@ -260,304 +203,14 @@
       return okType && okCourse && (!q || text.includes(q));
     });
     rowCount.textContent = String(rows.length);
-    if (!rows.length){
-      tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="muted">No rows.</td></tr>`;
-      return;
-    }
+    if (!rows.length){ tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="muted">No rows.</td></tr>`; return; }
     tbody.innerHTML = rows.map(r=>`
       <tr>
-        <td>${r.ts_server||''}</td>
-        <td>${r.type||''}</td>
-        <td>${r.name||''}</td>
-        <td>${r.course||''}</td>
-        <td>${r.company||''}</td>
-        <td>${r.ts_client||''}</td>
-        <td>${r.page||''}</td>
-        <td class="muted">${r.ua||''}</td>
-        <td><code style="font-size:.85rem">${r.videos_json||''}</code></td>
+        <td>${r.ts_server||''}</td><td>${r.type||''}</td><td>${r.name||''}</td><td>${r.course||''}</td>
+        <td>${r.company||''}</td><td>${r.ts_client||''}</td><td>${r.page||''}</td>
+        <td class="muted">${r.ua||''}</td><td><code style="font-size:.85rem">${r.videos_json||''}</code></td>
       </tr>`).join('');
   }
-  </script>
-</body>
-</html><!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Training Admin</title>
-  <meta name="color-scheme" content="dark">
-  <style>
-    :root{
-      --bg:#0b1020;        /* SOLID background to remove bands */
-      --card:#131a2a;
-      --muted:#92a0b8;
-      --fg:#e9edf5;
-      --accentA:#22d3ee;
-      --accentB:#3b82f6;
-      --input:#0e1525;
-      --border:rgba(255,255,255,.08);
-    }
-    *,*::before,*::after{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,"Noto Sans";
-      background:var(--bg);      /* <— solid, no gradient */
-      color:var(--fg);
-      min-height:100vh;
-    }
-
-    /* Header: Back • Title • Logo */
-    header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
-    .wrap{
-      max-width:1100px;margin:0 auto;
-      display:grid;grid-template-columns:1fr auto 1fr;align-items:center
-    }
-    .left{justify-self:start}
-    .center{justify-self:center;text-align:center}
-    .right{justify-self:end}
-    .brand{font-weight:800;letter-spacing:.2px;font-size:1.1rem}
-    .logo{height:36px}
-    .btnLink{
-      background:var(--input);color:var(--fg);border:1px solid var(--border);
-      font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none
-    }
-
-    main{max-width:1100px;margin:28px auto;padding:0 16px}
-    .card{
-      background:var(--card);border:1px solid var(--border);border-radius:18px;
-      padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);
-    }
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    input,select{
-      border-radius:10px;border:1px solid var(--border);
-      background:var(--input);color:var(--fg);padding:10px 12px;outline:none
-    }
-    .btn{
-      background:linear-gradient(135deg,var(--accentA),var(--accentB));
-      border:none;color:#06111d;font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer
-    }
-    .btn.secondary{background:var(--input);color:var(--fg);border:1px solid var(--border)}
-    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:12px;min-width:900px}
-    th,td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
-    th{position:sticky;top:0;background:#0e1525;z-index:1}
-    .muted{color:var(--muted)}
-    .pill{font-size:.85rem;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#0e1525}
-    .centerBox{display:flex;justify-content:center}
-    .error{color:#f87171;font-weight:700}
-  </style>
-</head>
-<body>
-  <header>
-    <div class="wrap">
-      <div class="left"><a class="btnLink" href="home.html">← Back</a></div>
-      <div class="center"><div class="brand">Training Admin</div></div>
-      <div class="right"><img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo"/></div>
-    </div>
-  </header>
-
-  <main>
-    <!-- Admin gate (no caching; password prompt every visit) -->
-    <section id="gate" class="card">
-      <div class="centerBox">
-        <div class="row">
-          <label for="adminPass" class="muted">Admin password</label>
-          <input id="adminPass" type="password" placeholder="Enter admin password"
-                 autocomplete="off" autocapitalize="off" spellcheck="false"/>
-          <button id="adminBtn" class="btn">Sign in</button>
-        </div>
-      </div>
-      <div class="centerBox"><div id="gateErr" class="error" style="margin-top:8px"></div></div>
-    </section>
-
-    <!-- Customers -->
-    <section id="customers" class="card" style="display:none">
-      <div class="row" style="justify-content:space-between">
-        <div class="row">
-          <button id="addCompanyBtn" class="btn">Add company</button>
-          <button id="refreshCustomersBtn" class="btn secondary">Refresh</button>
-        </div>
-        <button id="logoutTop" class="btn">Log out</button>
-      </div>
-      <div style="overflow:auto">
-        <table>
-          <thead>
-            <tr><th>Company</th><th>Agent code</th><th>Supervisor code</th><th>Admin code</th><th>Active</th><th>Created</th></tr>
-          </thead>
-          <tbody id="custBody"><tr><td colspan="6" style="padding:18px" class="muted">Loading…</td></tr></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Logs -->
-    <section id="panel" class="card" style="display:none; margin-top:18px">
-      <div class="row" style="justify-content:space-between">
-        <div class="row">
-          <span class="pill">Rows: <span id="rowCount">0</span></span>
-          <select id="typeFilter">
-            <option value="">All types</option>
-            <option value="signin">signin</option>
-            <option value="completion">completion</option>
-          </select>
-          <input id="courseFilter" placeholder="Course (e.g., agent)"/>
-          <input id="search" placeholder="Search name/UA/page/company"/>
-          <button id="refresh" class="btn secondary">Refresh</button>
-        </div>
-        <button id="logout" class="btn">Log out</button>
-      </div>
-      <div style="overflow:auto">
-        <table id="tbl">
-          <thead>
-            <tr>
-              <th>ts_server</th><th>type</th><th>name</th><th>course</th><th>company</th>
-              <th>ts_client</th><th>page</th><th>ua</th><th>videos_json</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"><tr><td colspan="9" style="padding:18px" class="muted">Loading…</td></tr></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <script>
-  // You can centralize these in config.js as window.APP_CONFIG; we’ll respect that if present.
-  const SCRIPT_URL = (window.APP_CONFIG && window.APP_CONFIG.SCRIPT_URL) || "YOUR_APPS_SCRIPT_URL";
-  const ADMIN_TOKEN = (window.APP_CONFIG && window.APP_CONFIG.ADMIN_TOKEN) || "YOUR_ADMIN_TOKEN";
-  const ADMIN_PASS  = (window.APP_CONFIG && window.APP_CONFIG.ADMIN_PASS)  || "cooladmin";
-
-  const gate = document.getElementById('gate');
-  const panel = document.getElementById('panel');
-  const customers = document.getElementById('customers');
-  const gateErr = document.getElementById('gateErr');
-
-  function showApp(){ gate.style.display='none'; customers.style.display=''; panel.style.display=''; loadCustomers(); loadLogs(); }
-  function showGate(){ gate.style.display=''; customers.style.display='none'; panel.style.display='none'; }
-
-  // Always require password (no caching).
-  document.getElementById('adminBtn').addEventListener('click', ()=>{
-    const val = document.getElementById('adminPass').value.trim();
-    gateErr.textContent = "";
-    if (val === ADMIN_PASS) showApp();
-    else gateErr.textContent = "Incorrect password.";
-  });
-
-  const doLogout = ()=>{ showGate(); document.getElementById('adminPass').value=''; };
-  document.getElementById('logout').addEventListener('click', doLogout);
-  document.getElementById('logoutTop').addEventListener('click', doLogout);
-
-  // ---- Customers ----
-  const custBody = document.getElementById('custBody');
-  document.getElementById('refreshCustomersBtn').addEventListener('click', loadCustomers);
-  document.getElementById('addCompanyBtn').addEventListener('click', async ()=>{
-    const name = prompt('Company name'); if (!name) return;
-    try{
-      const res = await fetch(SCRIPT_URL, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ mode:'addCompany', token: ADMIN_TOKEN, company: name })
-      });
-      const text = await res.text();
-      let data; try { data = JSON.parse(text); } catch { data = null; }
-      if (!res.ok || !data || data.ok !== true) {
-        alert(text === 'UNAUTHORIZED'
-          ? 'Token mismatch or old deployment.\nMake sure ADMIN_TOKEN === SECRET_TOKEN and redeploy.'
-          : 'Server error: ' + text);
-        return;
-      }
-      await loadCustomers();
-      alert(`Codes for "${data.company}":\nAgent: ${data.agent}\nSupervisor: ${data.supervisor}\nAdmin: ${data.admin}`);
-    }catch{ alert('Network error'); }
-  });
-
-  async function loadCustomers(){
-    custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="muted">Loading…</td></tr>`;
-    try{
-      const url = `${SCRIPT_URL}?mode=customers&token=${encodeURIComponent(ADMIN_TOKEN)}`;
-      const res = await fetch(url);
-      const text = await res.text();
-      if (!res.ok) {
-        custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="error">HTTP ${res.status}<br><code>${text.slice(0,200)}</code></td></tr>`;
-        return;
-      }
-      if (text === 'UNAUTHORIZED') {
-        custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="error">UNAUTHORIZED — set ADMIN_TOKEN to match SECRET_TOKEN and redeploy.</td></tr>`;
-        return;
-      }
-      const data = JSON.parse(text);
-      const rows = (data && data.rows) ? data.rows : [];
-      if (!rows.length){ custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="muted">No companies yet.</td></tr>`; return; }
-      custBody.innerHTML = rows.map(r=>`
-        <tr>
-          <td>${r.company||''}</td>
-          <td><code>${r.agent_code||''}</code></td>
-          <td><code>${r.supervisor_code||''}</code></td>
-          <td><code>${r.admin_code||''}</code></td>
-          <td>${String(r.active).toLowerCase()!=='false'?'Yes':'No'}</td>
-          <td>${r.created_ts||''}</td>
-        </tr>`).join('');
-    }catch{
-      custBody.innerHTML = `<tr><td colspan="6" style="padding:18px" class="error">Network error while loading customers.</td></tr>`;
-    }
-  }
-
-  // ---- Logs ----
-  const tbody = document.getElementById('tbody'), rowCount = document.getElementById('rowCount');
-  const typeFilter = document.getElementById('typeFilter'),
-        courseFilter = document.getElementById('courseFilter'),
-        search = document.getElementById('search');
-
-  document.getElementById('refresh').addEventListener('click', loadLogs);
-  let allRows = [];
-
-  async function loadLogs(){
-    tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="muted">Loading…</td></tr>`;
-    try{
-      const url = `${SCRIPT_URL}?mode=json&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=2000`;
-      const res = await fetch(url);
-      const text = await res.text();
-      if (!res.ok) {
-        tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="error">HTTP ${res.status}<br><code>${text.slice(0,200)}</code></td></tr>`;
-        return;
-      }
-      if (text === 'UNAUTHORIZED') {
-        tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="error">UNAUTHORIZED — token mismatch.</td></tr>`;
-        return;
-      }
-      const data = JSON.parse(text);
-      allRows = (data && data.rows) ? data.rows : [];
-      renderLogs();
-    }catch{
-      tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="error">Failed to load logs.</td></tr>`;
-    }
-  }
-
-  function renderLogs(){
-    const t = s => (s==null||s==="")?"":String(s);
-    const q = search.value.trim().toLowerCase(),
-          tf = typeFilter.value.trim().toLowerCase(),
-          cf = courseFilter.value.trim().toLowerCase();
-    const rows = allRows.filter(r=>{
-      const okType = !tf || t(r.type).toLowerCase()===tf;
-      const okCourse = !cf || t(r.course).toLowerCase().includes(cf);
-      const text = (t(r.name)+" "+t(r.ua)+" "+t(r.page)+" "+t(r.company)).toLowerCase();
-      return okType && okCourse && (!q || text.includes(q));
-    });
-    rowCount.textContent = String(rows.length);
-    if (!rows.length){
-      tbody.innerHTML = `<tr><td colspan="9" style="padding:18px" class="muted">No rows.</td></tr>`;
-      return;
-    }
-    tbody.innerHTML = rows.map(r=>`
-      <tr>
-        <td>${r.ts_server||''}</td>
-        <td>${r.type||''}</td>
-        <td>${r.name||''}</td>
-        <td>${r.course||''}</td>
-        <td>${r.company||''}</td>
-        <td>${r.ts_client||''}</td>
-        <td>${r.page||''}</td>
-        <td class="muted">${r.ua||''}</td>
-        <td><code style="font-size:.85rem">${r.videos_json||''}</code></td>
-      </tr>`).join('');
-  }
-  </script>
+</script>
 </body>
 </html>
