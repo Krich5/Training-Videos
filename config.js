@@ -1,15 +1,17 @@
-// Global config used by all pages
+<!-- config.js -->
+<script>
 window.APP_CONFIG = {
-  // Paste your live Web App (exec) URL from Apps Script Deploy > Manage deployments
+  // MUST be the exact live /exec URL that admin.html is using and that you see working
   SCRIPT_URL: "https://script.google.com/macros/s/AKfycbwawMz0Vgg4PSp7sZ0cWCYkEWtEL_fDunaimL5MbmjxC05QIshFdmPcedH0y6Gctu_V/exec",
 
-  // Must match SECRET_TOKEN in Apps Script
+  // must match SECRET_TOKEN in Apps Script
   ADMIN_TOKEN: "CXASTrainingPortal25",
 
-  // Admin password for the gate
+  // admin gate password
   ADMIN_PASS: "cooladmin",
 
   BRAND: "CXAS Training Portal",
   TIMEZONE: "America/New_York",
-  VERSION: "v2" // bump when you change config to bust cache
+  VERSION: "v3" // bump this anytime you change config to bust caches
 };
+</script>
