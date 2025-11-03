@@ -1,8 +1,8 @@
 (function () {
   const VERSION = 'v1';
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwawMz0Vgg4PSp7sZ0cWCYkEWtEL_fDunaimL5MbmjxC05QIshFdmPcedH0y6Gctu_V/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBXz7dEnenXJMEYkBFNLBDkZECMd9GAzt-xMKZjuNBe8hYDotEgpe0fvNjiRz5OySU/exec';
   const ADMIN_TOKEN = 'CXASTrainingPortal25';
-  const ADMIN_PASS = 'cooladmin';
+  const ADMIN_PASS = 'admin';
   const BRAND = 'CXAS Training Portal';
   const TIMEZONE = 'America/New_York';
 
