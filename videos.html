@@ -22,6 +22,12 @@
   h2{margin:6px 0 12px 0}
   .muted{color:var(--muted)}
   video{width:100%;aspect-ratio:16/9;background:#000;border-radius:14px}
+  /* Hide timeline while locked (Chrome/Safari/WebKit) */
+  video.locked::-webkit-media-controls-timeline{ display:none !important; }
+  /* Also hide the scrubbing hover for WebKit */
+  video.locked::-webkit-media-controls-seek-back-button,
+  video.locked::-webkit-media-controls-seek-forward-button { display:none !important; }
+
   .prog{margin-top:12px;background:var(--input);border:1px solid var(--border);border-radius:10px;overflow:hidden}
   .bar{height:10px;background:linear-gradient(135deg,var(--accentA),var(--accentB));width:0%}
   .row{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
@@ -32,6 +38,7 @@
   .badge{font-size:.8rem;color:var(--muted)}
   .badge.done{color:var(--ok);font-weight:700}
   .hint{font-size:.9rem;color:var(--muted);margin-top:6px}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#0e1525;border:1px solid var(--border);padding:10px 14px;border-radius:10px}
 </style>
 </head>
 <body>
@@ -43,9 +50,8 @@
 
   <div class="wrap">
     <section class="card" id="playerCard">
-      <!-- Only the current video title lives here -->
       <h2 id="videoTitle">Loading…</h2>
-      <video id="player" controls playsinline
+      <video id="player" controls playsinline preload="metadata"
              controlsList="nodownload noplaybackrate noremoteplayback"
              disablepictureinpicture></video>
 
@@ -59,6 +65,8 @@
       <div class="hint" id="playlistNote"></div>
     </section>
   </div>
+
+  <div id="toast" class="toast" style="display:none">Seeking ahead is disabled until you finish this video.</div>
 
 <script>
 /* ====== CONFIG ====== */
@@ -97,24 +105,31 @@ const bar = document.getElementById('bar');
 const progText = document.getElementById('progText');
 const lockHint = document.getElementById('lockHint');
 const playlistNote = document.getElementById('playlistNote');
+const toast = document.getElementById('toast');
 
 /* ====== STATE ====== */
 const vids = playlistFor(user.course);
 let idx = 0;
 let completed = new Array(vids.length).fill(false);
-let maxSeen = 0;
 let unlocked = false;
-let guardingSeek = false;
-let guardTimer = null;
+let maxSeen = 0;             // furthest point reached for current video
+let showingToast = false;
 
-/* ====== RENDER HELPERS ====== */
+/* ====== SMALL UTILS ====== */
+function showToast(msg){
+  toast.textContent = msg;
+  if (showingToast) return;
+  showingToast = true;
+  toast.style.display = 'block';
+  setTimeout(()=>{ toast.style.display='none'; showingToast=false; }, 1200);
+}
 function overall(){
   const done = completed.filter(Boolean).length;
   progText.textContent = `${done}/${vids.length} completed`;
   bar.style.width = `${(done/Math.max(1,vids.length))*100}%`;
   playlistNote.textContent = unlocked
     ? 'All videos complete — you can jump and seek freely.'
-    : 'First time through: watch in order. You can rewind anytime, but cannot fast-forward past what you’ve already watched.';
+    : 'First time through: watch in order. You can rewind anytime, but cannot fast-forward.';
 }
 function nextPlayableIndex(){
   const firstTodo = completed.findIndex(x=>!x);
@@ -130,8 +145,7 @@ function renderList(){
     el.addEventListener('click', ()=>{
       const i = Number(el.getAttribute('data-i'));
       if (!unlocked && i > nextPlayableIndex()) {
-        el.animate([{transform:'translateX(0)'},{transform:'translateX(-4px)'},{transform:'translateX(0)'}], {duration:180});
-        return;
+        showToast('Please watch in order'); return;
       }
       if (i === idx){ player.currentTime = 0; player.play(); return; }
       idx = i; loadCurrent(true);
@@ -140,55 +154,63 @@ function renderList(){
   overall();
 }
 
-/* ====== SEEK GUARD ====== */
-function startGuard(){
-  stopGuard();
-  if (unlocked) return;
-  guardTimer = setInterval(()=>{
-    if (unlocked) { stopGuard(); return; }
-    const allowed = Math.max(0, maxSeen - 0.25);
-    if (player.currentTime > allowed) player.currentTime = allowed;
-  }, 150);
-}
-function stopGuard(){ if (guardTimer){ clearInterval(guardTimer); guardTimer=null; } }
-function clampSeek(){
-  if (unlocked || guardingSeek) return;
-  const allowed = Math.max(0, maxSeen - 0.25);
-  if (player.currentTime > allowed) {
-    guardingSeek = true;
-    player.currentTime = allowed;
-    setTimeout(()=>guardingSeek=false,0);
+/* ====== LOAD CURRENT VIDEO ====== */
+function setLockedUI(on){
+  if (on){
+    player.classList.add('locked');
+    lockHint.textContent = 'Seeking ahead is disabled until you’ve finished this video.';
+  } else {
+    player.classList.remove('locked');
+    lockHint.textContent = '';
   }
 }
-
-/* ====== LOAD / EVENTS ====== */
 function loadCurrent(autoplay){
   maxSeen = 0;
-  lockHint.textContent = unlocked ? '' : 'Seeking ahead is disabled until you’ve watched this video once.';
+  setLockedUI(!unlocked);
   player.src = vids[idx].src;
   videoTitle.textContent = vids[idx].title;
-  // Wait for metadata before starting the guard so playback isn't blocked
+
+  // Wait for metadata then start at 0
   player.onloadedmetadata = ()=>{
     player.currentTime = 0;
-    startGuard();
     if (autoplay) player.play();
   };
   renderList();
 }
 
-/* keep maxSeen growing while playing */
-player.addEventListener('timeupdate', ()=>{ if (!unlocked) maxSeen = Math.max(maxSeen, player.currentTime||0); });
-player.addEventListener('seeking', clampSeek);
-player.addEventListener('seeked', clampSeek);
+/* ====== ANTI-SKIP GUARD ====== */
+/* Grow maxSeen while playing (first pass only) */
+player.addEventListener('timeupdate', ()=>{
+  if (!unlocked) maxSeen = Math.max(maxSeen, player.currentTime||0);
+});
+/* Clamp seeks that jump forward of maxSeen (first pass only) */
+function clampIfNeeded(){
+  if (unlocked) return;
+  const allowed = Math.max(0, maxSeen - 0.15);
+  if (player.currentTime > allowed + 0.2) {
+    player.currentTime = allowed;
+    showToast('Seeking ahead is disabled');
+  }
+}
+player.addEventListener('seeking', clampIfNeeded);
+player.addEventListener('seeked', clampIfNeeded);
+/* Disallow >1x on first pass */
 player.addEventListener('ratechange', ()=>{ if (!unlocked && player.playbackRate>1) player.playbackRate = 1; });
+/* Block keyboard arrow skip on first pass */
+window.addEventListener('keydown', (e)=>{
+  if (!unlocked && (e.key === 'ArrowRight' || e.key === 'ArrowUp' || (e.key === 'l' && e.code==='KeyL'))) {
+    e.preventDefault(); showToast('Seeking ahead is disabled');
+  }
+});
 
+/* ====== ON END ====== */
 player.addEventListener('ended', ()=>{
   completed[idx] = true;
   const allDone = completed.every(Boolean);
 
   if (allDone && !unlocked){
     unlocked = true;
-    lockHint.textContent = '';
+    setLockedUI(false);
     overall();
     const videos_json = vids.map((v,i)=>({ index:i, title:v.title, src:v.src }));
     fetch(SCRIPT_URL, {
