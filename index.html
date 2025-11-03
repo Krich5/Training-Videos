@@ -33,17 +33,15 @@
 <body>
   <header>
     <div class="wrap">
-      <div class="left">
-        <a class="btnLink" href="admin.html">Admin</a>
-      </div>
-      <div class="center"><div class="brand">Training Portal</div></div>
+      <div class="left"><a class="btnLink" href="admin.html">Admin</a></div>
+      <div class="center"><div class="brand" id="brand">Training Portal</div></div>
       <div class="right"><img src="CX%20Advanced%20Solutions_Smaller_white.png" alt="CX Advanced Solutions" class="logo" /></div>
     </div>
   </header>
 
   <main>
     <section class="card">
-      <h1>CXAS Training Portal</h1>
+      <h1 id="headline">CXAS Training Portal</h1>
       <p class="lead">Enter your name and your 10-character access code.</p>
 
       <form id="gateForm" novalidate>
@@ -59,9 +57,14 @@
 
   <footer>© <span id="yr"></span> Training</footer>
 
+  <script src="config.js?v=v1"></script>
   <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwawMz0Vgg4PSp7sZ0cWCYkEWtEL_fDunaimL5MbmjxC05QIshFdmPcedH0y6Gctu_V/exec";
+  const { SCRIPT_URL, BRAND } = window.APP_CONFIG || {};
   document.getElementById("yr").textContent=new Date().getFullYear();
+  if (BRAND) {
+    document.getElementById('brand').textContent = BRAND;
+    document.getElementById('headline').textContent = BRAND;
+  }
   const errorEl = document.getElementById("error");
 
   document.getElementById("gateForm").addEventListener("submit", async (e) => {
@@ -72,24 +75,19 @@
     if (!name || !code){ errorEl.textContent = "Please fill out both fields."; return; }
 
     try{
-      // Simple POST without headers => no CORS preflight
-      const res = await fetch(SCRIPT_URL, {
-        method:"POST",
-        body: JSON.stringify({ mode:"validate", code })
-      });
-      const raw = await res.text(); let data;
-      try { data = JSON.parse(raw); } catch { data = null; }
-      if (!res.ok) { errorEl.textContent = "Server error. Try again."; return; }
-      if (!data)    { errorEl.textContent = "Unexpected response."; return; }
-      if (!data.ok) { errorEl.textContent = data.error || "Invalid or inactive code."; return; }
+      // No headers -> no preflight (more reliable on mobile)
+      const res = await fetch(SCRIPT_URL, { method:"POST", body: JSON.stringify({ mode:"validate", code }) });
+      const raw = await res.text(); let data; try { data = JSON.parse(raw); } catch { data = null; }
+      if (!res.ok || !data) { errorEl.textContent = raw || "Server error. Try again."; return; }
+      if (!data.ok)         { errorEl.textContent = data.error || "Invalid or inactive code."; return; }
 
       const course  = data.course;
       const company = data.company || "";
       sessionStorage.setItem('tp_user', JSON.stringify({ name, course, company }));
 
-      // background log of sign-in
+      // background sign-in log
       fetch(SCRIPT_URL, { method:"POST", body: JSON.stringify({
-        mode:"signin", name, course, company,
+        type:"signin", name, course, company,
         ts_client: new Date().toISOString(),
         ua:navigator.userAgent, page:"index"
       }) }).catch(()=>{});
