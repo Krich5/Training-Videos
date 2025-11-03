@@ -6,48 +6,35 @@
 <title>Training Videos</title>
 <meta name="color-scheme" content="dark">
 <style>
-  :root{
+  :root {
     --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5; --input:#0e1525;
-    --border:rgba(255,255,255,.08); --accentA:#22d3ee; --accentB:#3b82f6; --ok:#34d399; --warn:#f59e0b;
+    --border:rgba(255,255,255,.08); --accentA:#22d3ee; --accentB:#3b82f6;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:ui-sans-serif,system-ui;background:var(--bg);color:var(--fg);min-height:100vh}
+  body{margin:0;font-family:ui-sans-serif,system-ui;background:#0b1020;color:#e9edf5;min-height:100vh}
   header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
   .btnLink{background:var(--input);color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
   .wrap{max-width:1100px;margin:22px auto;padding:0 16px}
   .grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
-  @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
   h1,h2{margin:6px 0 12px 0}
   .muted{color:var(--muted)}
   video{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px}
-  /* overall progress */
-  .overall{margin:10px 0 6px 0;font-weight:700}
-  .bar{height:10px;background:var(--input);border:1px solid var(--border);border-radius:999px;overflow:hidden}
-  .bar>span{display:block;height:100%;width:0%;background:linear-gradient(135deg,var(--accentA),var(--accentB))}
-  /* per-video progress (tiny) */
-  .pbar{height:6px;background:var(--input);border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-top:6px}
-  .pbar>span{display:block;height:100%;width:0%;background:var(--accentB)}
-  /* playlist */
   ul{list-style:none;margin:0;padding:0}
-  .item{padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--input);margin-bottom:10px;cursor:pointer}
-  .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
-  .badge{font-size:.8rem;color:var(--muted)}
+  .item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:var(--input);margin-bottom:8px;cursor:pointer}
   .item.active{outline:2px solid var(--accentB)}
-  .done{color:var(--ok);font-weight:800}
-  /* toast */
-  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#0b1222;border:1px solid var(--border);padding:10px 12px;border-radius:10px;color:#fff;opacity:0;pointer-events:none;transition:opacity .2s}
-  .toast.show{opacity:1}
-  /* modal */
-  .modalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center}
-  .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;max-width:420px;width:92%}
-  .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:10px 16px;border-radius:12px;cursor:pointer}
+  .badge{font-size:.8rem;color:var(--muted)}
+  .btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:8px 14px;border-radius:10px;cursor:pointer}
+  .progWrap{margin-top:12px;background:#0e1525;border:1px solid var(--border);border-radius:999px;overflow:hidden;height:10px}
+  .progBar{height:100%;width:0%;background:linear-gradient(90deg,var(--accentA),var(--accentB));transition:width .25s}
+  .hint{font-size:.85rem;color:var(--muted);margin-top:8px}
 </style>
+<script src="config.js?v=v1"></script>
 </head>
 <body>
   <header>
     <a class="btnLink" href="index.html">← Back</a>
-    <div style="font-weight:800">Training Videos</div>
+    <div style="font-weight:800" id="hdr">Training Videos</div>
     <div></div>
   </header>
 
@@ -55,13 +42,10 @@
     <div class="grid">
       <section class="card">
         <h2 id="courseTitle" class="muted">Loading…</h2>
-
-        <div class="overall" id="overallText">0% complete</div>
-        <div class="bar"><span id="overallBar"></span></div>
-
         <video id="player" controls playsinline></video>
+        <div class="progWrap"><div id="overallBar" class="progBar"></div></div>
+        <div id="overallHint" class="hint"></div>
       </section>
-
       <aside class="card">
         <h2>Playlist</h2>
         <ul id="list"></ul>
@@ -70,191 +54,136 @@
     </div>
   </div>
 
-  <div id="toast" class="toast">You can’t skip ahead yet.</div>
-
-  <!-- Completion modal -->
-  <div id="doneWrap" class="modalBackdrop">
-    <div class="modal">
-      <h2>Nice! You’re all done ✅</h2>
-      <p>Your completion has been recorded.</p>
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
-        <button class="btn" id="closeDone">Close</button>
-      </div>
-    </div>
-  </div>
-
 <script>
-/* ====== CONFIG ====== */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbw_9jCEBEtNryYES2-56EJ7s2vq2E4ezkrldHJh8Guoavn-4FOfFjQg8-WWZIaRo8/exec";
+const { SCRIPT_URL, BRAND } = window.APP_CONFIG || {};
+if (BRAND) document.getElementById('hdr').textContent = BRAND;
 
-/* ====== USER CONTEXT ====== */
+// ---- User context ----
 const user = (()=>{ try{ return JSON.parse(sessionStorage.getItem('tp_user')||'null'); }catch{ return null; }})();
 if(!user){ location.href='index.html'; }
 
-/* ====== PLAYLISTS ====== */
+// ---- Playlists ----
 function playlistFor(course){
   if(course === 'agent'){
     return [
-      { title:'Agent login',      src:'AgentVideos/Agent%20Login%20(Desktop).mp4' },
-      { title:'Profile settings', src:'AgentVideos/Profiles%20Settings.mp4' },
-      { title:'Agent state',      src:'AgentVideos/Agent%20State.mp4' },
-      { title:'Outbound calling', src:'AgentVideos/Outbound%20Calling.mp4' },
-      { title:'Side navigation',  src:'AgentVideos/Side%20Navigation.mp4' },
-      { title:'Sign out',         src:'AgentVideos/Sign%20Out.mp4' }
+      { title:'Agent login',         src:'AgentVideos/Agent%20Login%20(Desktop).mp4' },
+      { title:'Profile settings',    src:'AgentVideos/Profiles%20Settings.mp4' },
+      { title:'Agent state',         src:'AgentVideos/Agent%20State.mp4' },
+      { title:'Outbound calling',    src:'AgentVideos/Outbound%20Calling.mp4' },
+      { title:'Side navigation',     src:'AgentVideos/Side%20Navigation.mp4' },
+      { title:'Sign out',            src:'AgentVideos/Sign%20Out.mp4' }
     ];
   }
-  if(course === 'supervisor'){ return [ { title:'Supervisor intro', src:'SupVideos/IMG_3339.mov' } ]; }
-  if(course === 'admin'){ return [ { title:'Admin intro', src:'AdminVideos/intro.mp4' } ]; }
+  if(course === 'supervisor'){ return [{ title:'Supervisor intro', src:'SupVideos/IMG_3339.mov' }]; }
+  if(course === 'admin'){ return [{ title:'Admin intro', src:'AdminVideos/intro.mp4' }]; }
   return [];
 }
 
-/* ====== UI HOOKS ====== */
+// ---- UI refs ----
 const listEl   = document.getElementById('list');
 const statusEl = document.getElementById('status');
 const player   = document.getElementById('player');
 const courseTitle = document.getElementById('courseTitle');
-const toast = document.getElementById('toast');
-const doneWrap = document.getElementById('doneWrap');
-document.getElementById('closeDone').addEventListener('click', ()=> doneWrap.style.display='none');
-const overallText = document.getElementById('overallText');
-const overallBar  = document.getElementById('overallBar');
+const overallBar = document.getElementById('overallBar');
+const overallHint = document.getElementById('overallHint');
 
-/* ====== STATE ====== */
+// ---- State ----
 const vids = playlistFor(user.course);
 let idx = 0;
-let finished = vids.map(()=>false);
-// per-video max allowed (in seconds). You can always rewind <= this value.
-let maxSeen = vids.map(()=>0);
+let finished = new Array(vids.length).fill(false);
+// Fast-forward guard per video
+let maxAllowedTime = 0;      // seconds
+let seekingGuard = false;    // ignore re-entrant seeks
 
-/* ====== HELPERS ====== */
-function showToast(msg){
-  toast.textContent = msg || "You can’t skip ahead yet.";
-  toast.classList.add('show');
-  setTimeout(()=> toast.classList.remove('show'), 1200);
-}
-function pct(n){ return Math.max(0,Math.min(100,Math.round(n))); }
-function updateOverall(){
-  const total = vids.length;
-  const done = finished.filter(Boolean).length;
-  const percent = pct((done/total)*100);
-  overallText.textContent = `${percent}% complete`;
-  overallBar.style.width = `${percent}%`;
-  statusEl.textContent = `${done}/${total} videos completed`;
-}
+courseTitle.textContent = `${user.company} — ${user.course[0].toUpperCase()+user.course.slice(1)} Training`;
 
-/* ====== RENDER LIST ====== */
+// ---- Render playlist ----
 function renderList(){
   listEl.innerHTML = vids.map((v,i)=>`
     <li class="item ${i===idx?'active':''}" data-i="${i}">
-      <div class="row">
-        <div>
-          <div>${i+1}. ${v.title}</div>
-          <div class="badge ${finished[i]?'done':''}">${finished[i]?'done':''}</div>
-        </div>
-        <div style="min-width:120px;flex:1">
-          <div class="pbar"><span id="pbar-${i}" style="width:${pct((maxSeen[i] / (v._dur||1))*100)}%"></span></div>
-        </div>
-      </div>
+      <span>${i+1}. ${v.title}</span>
+      <span class="badge">${finished[i] ? 'done' : ''}</span>
     </li>`).join('');
-
   listEl.querySelectorAll('.item').forEach(el=>{
     el.addEventListener('click', ()=>{
       const i = Number(el.getAttribute('data-i'));
-      if (i === idx){ player.currentTime = 0; player.play(); return; }
-      idx = i; loadCurrent(true);
+      // allow jumping only to already-finished or current item
+      if (i <= idx || finished[i-1] === true) {
+        idx = i;
+        loadCurrent(true);
+      }
     });
   });
-  updateOverall();
+
+  const doneCount = finished.filter(Boolean).length;
+  statusEl.textContent = `${doneCount}/${vids.length} completed`;
+  const pct = vids.length ? (doneCount / vids.length) * 100 : 0;
+  overallBar.style.width = pct.toFixed(1)+'%';
+  overallHint.textContent = `Overall progress: ${Math.round(pct)}%`;
 }
 
-/* ====== LOAD CURRENT VIDEO ====== */
+// ---- Load current video & reset guard ----
 function loadCurrent(autoplay){
   player.src = vids[idx].src;
+  // reset fast-forward guard
+  maxAllowedTime = 0;
   player.currentTime = 0;
-  // allow only what we’ve seen so far
-  // (duration unknown until metadata; we update progress once loaded)
-  renderList();
-  // Scroll active item into view on mobile
-  const active = listEl.querySelector('.item.active');
-  if (active) active.scrollIntoView({block:'nearest', behavior:'smooth'});
   if (autoplay) player.play();
+  renderList();
 }
 
-/* ====== SEEK GUARD ====== */
-let blockSeek = false;
-
-player.addEventListener('loadedmetadata', ()=>{
-  vids[idx]._dur = player.duration || vids[idx]._dur || 0;
-  // clamp maxSeen to duration in case duration is shorter than previous value
-  maxSeen[idx] = Math.min(maxSeen[idx], player.duration || maxSeen[idx]);
-  renderList();
-});
-
+// ---- Enforce no fast-forward beyond watched ----
 player.addEventListener('timeupdate', ()=>{
-  // grow maxSeen as they watch
-  if (!isFinite(player.duration) || player.duration === 0) return;
-
-  if (player.currentTime > maxSeen[idx]){
-    maxSeen[idx] = player.currentTime;
-    const bar = document.getElementById(`pbar-${idx}`);
-    if (bar) bar.style.width = `${pct((maxSeen[idx]/player.duration)*100)}%`;
-  }
-
-  // mark finished near the end (with small buffer)
-  if (!finished[idx] && player.duration - player.currentTime <= 0.75){
-    finished[idx] = true;
-    updateOverall();
-    renderList();
+  if (player.currentTime > maxAllowedTime) {
+    // track forward progress only when actually playing forward
+    maxAllowedTime = player.currentTime;
   }
 });
-
-// Prevent skipping ahead beyond what’s watched
 player.addEventListener('seeking', ()=>{
-  if (blockSeek) return;
-  const allowed = Math.max(0, maxSeen[idx] + 0.5); // small grace
-  if (player.currentTime > allowed){
-    blockSeek = true;
-    player.currentTime = allowed;
-    setTimeout(()=>{ blockSeek=false; }, 0);
-    showToast("You can’t skip ahead yet.");
+  if (seekingGuard) return;
+  // allow seeking backward anywhere; block forward beyond maxAllowedTime
+  if (player.currentTime > maxAllowedTime + 0.5) {
+    seekingGuard = true;
+    player.currentTime = maxAllowedTime;
+    seekingGuard = false;
   }
 });
 
-/* ====== END HANDLER ====== */
+// ---- On ended: mark complete, advance, and log when all done ----
 player.addEventListener('ended', ()=>{
-  // If all videos finished, record completion
+  finished[idx] = true;
+
   const allDone = finished.every(Boolean);
   if (allDone){
     const videos_json = vids.map((v,i)=>({ index:i, title:v.title, src:v.src }));
-    // Post without custom headers to avoid CORS preflight
-    fetch(SCRIPT_URL, {
-      method:'POST',
-      body: JSON.stringify({
-        mode:'completion',
-        name:user.name,
-        course:user.course,
-        company:user.company,
-        ts_client: Date.now(),
-        page:'videos',
-        ua: navigator.userAgent,
-        videos_json
-      })
-    }).catch(()=>{ /* best-effort */ });
-
-    // show confirmation
-    doneWrap.style.display = 'flex';
-  } else {
-    // advance to next video automatically
-    if (idx < vids.length-1){
-      idx++;
-      loadCurrent(true);
+    if (SCRIPT_URL){
+      fetch(SCRIPT_URL, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          mode:'completion',
+          name:user.name,
+          course:user.course,
+          company:user.company,
+          ts_client: new Date().toISOString(),
+          page:'videos',
+          ua: navigator.userAgent,
+          videos_json
+        })
+      }).catch(()=>{});
     }
   }
+
+  // Move to the next video (if any)
+  if (idx < vids.length - 1){
+    idx++;
+    loadCurrent(true);
+  }
+  renderList();
 });
 
-/* ====== BOOT ====== */
-courseTitle.textContent = `${user.company} — ${user.course[0].toUpperCase()+user.course.slice(1)} Training`;
+// ---- Boot ----
 if (!vids.length){
+  courseTitle.textContent = `${user.company} — ${user.course} Training`;
   statusEl.textContent = 'No videos assigned for this course yet.';
 } else {
   loadCurrent(false);
