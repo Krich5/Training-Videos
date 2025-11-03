@@ -75,9 +75,10 @@
     </section>
   </div>
 
+<script src="config.js?v=v1"></script>
 <script>
-/* ====== BACKEND URL (same as admin) ====== */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwawMz0Vgg4PSp7sZ0cWCYkEWtEL_fDunaimL5MbmjxC05QIshFdmPcedH0y6Gctu_V/exec";
+/* ====== BACKEND URL (from config) ====== */
+const { SCRIPT_URL } = window.APP_CONFIG || {};
 
 /* ====== USER CONTEXT ====== */
 const user = (()=>{ try{ return JSON.parse(sessionStorage.getItem('tp_user')||'null'); }catch{ return null; }})();
@@ -149,9 +150,7 @@ function renderList(){
 function loadCurrent(autoplay){
   player.src = vids[idx].src;
   videoTitle.textContent = vids[idx].title;
-  player.onloadedmetadata = ()=>{
-    if (autoplay) player.play();
-  };
+  player.onloadedmetadata = ()=>{ if (autoplay) player.play(); };
   renderList();
 }
 
@@ -165,7 +164,7 @@ player.addEventListener('ended', ()=>{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        mode:'completion',
+        type:'completion',           // <— important for logs
         name:user.name,
         course:courseName,
         company:user.company,
