@@ -146,18 +146,26 @@ document.getElementById('addCompanyBtn').addEventListener('click', async ()=>{
 
 async function revokeCustomer(company){
   if (!confirm(`Revoke access for "${company}"?`)) return;
+
   try{
     const res = await fetch(SCRIPT_URL, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ mode:'revokeCompany', token: ADMIN_TOKEN, company })
+      method: 'POST',
+      // IMPORTANT: no headers -> no CORS preflight; Apps Script can still read the body
+      body: JSON.stringify({ mode: 'revokeCompany', token: ADMIN_TOKEN, company })
     });
-    const text = await res.text(); let data; try { data = JSON.parse(text); } catch { data = null; }
+
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch { data = null; }
+
     if (!res.ok || !data || data.ok !== true){
       alert(text || 'Server error revoking access.');
       return;
     }
+
     loadCustomers();
-  }catch{ alert('Network error while revoking.'); }
+  }catch (e){
+    alert('Network error while revoking.');
+  }
 }
 
 async function loadCustomers(){
