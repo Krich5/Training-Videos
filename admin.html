@@ -1,175 +1,255 @@
-(function () {
-  if (window.__adminAccessLoaded) return;
-  window.__adminAccessLoaded = true;
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Training Admin</title>
+<meta name="color-scheme" content="dark">
+<style>
+:root{
+  --bg:#0b1020; --card:#131a2a; --muted:#92a0b8; --fg:#e9edf5;
+  --accentA:#22d3ee; --accentB:#3b82f6; --input:#0e1525; --border:rgba(255,255,255,.08);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{ margin:0; font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;
+  background:var(--bg); color:var(--fg); min-height:100vh; }
+header{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+.wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.left{justify-self:start}.center{justify-self:center;text-align:center}.right{justify-self:end}
+.brand{font-weight:800;letter-spacing:.2px;font-size:1.1rem}.logo{height:36px}
+.btnLink{background:var(--input);color:var(--fg);border:1px solid var(--border);font-weight:800;padding:8px 14px;border-radius:12px;text-decoration:none}
+main{max-width:1100px;margin:28px auto;padding:0 16px}
+.card{position:relative;background:linear-gradient(145deg,rgba(46,74,142,.55),rgba(107,33,168,.5));border:1px solid transparent;border-radius:34px;padding:24px 28px;box-shadow:0 25px 60px rgba(5,10,25,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);transition:box-shadow .35s ease;overflow:hidden;}
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  padding:1px;
+  background:linear-gradient(135deg,rgba(34,211,238,.7),rgba(59,130,246,.25),rgba(15,23,42,.2));
+  -webkit-mask:
+    linear-gradient(#000,#000) content-box,
+    linear-gradient(#000,#000);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  opacity:.4;
+  pointer-events:none;
+  transition:opacity .3s ease;
+}
+.card:hover::before,
+.card:focus-within::before{opacity:.95;}
+.card:focus-within{box-shadow:0 35px 80px rgba(34,211,238,.35);}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+input,select{border-radius:10px;border:1px solid var(--border);background:var(--input);color:#e9edf5;padding:10px 12px;outline:none}
+.btn{background:linear-gradient(135deg,var(--accentA),var(--accentB));border:none;color:#06111d;font-weight:800;padding:10px 18px;border-radius:12px;cursor:pointer}
+.btn.secondary{background:var(--input);color:var(--fg);border:1px solid var(--border)}
+table{width:100%;border-collapse:separate;border-spacing:0;margin-top:12px;min-width:900px}
+th,td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+th{position:sticky;top:0;background:#0e1525;z-index:1;text-transform:capitalize}
+.muted{color:var(--muted)}.error{color:#f87171;font-weight:700;text-align:center}
+.action{display:flex;gap:8px}.badge{font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="left"><a class="btnLink" href="index.html">← Back</a></div>
+    <div class="center"><div class="brand">Training Admin</div></div>
+    <div class="right"><img src="CX%20Advanced%20Solutions_Smaller_white.png" class="logo" alt="logo"></div>
+  </div>
+</header>
 
-  function ready(fn){
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", fn, { once: true });
-    } else {
-      fn();
+<main>
+  <!-- Admin Gate -->
+  <section id="gate" class="card" data-magic-bento>
+    <div class="row" style="justify-content:center">
+      <label for="adminPass" class="muted">Admin password</label>
+      <input id="adminPass" type="password" placeholder="Enter admin password" autocomplete="off" spellcheck="false">
+      <button id="adminBtn" class="btn">Sign in</button>
+    </div>
+    <div id="gateErr" class="error"></div>
+  </section>
+
+  <!-- Customers -->
+  <section id="customers" class="card" style="display:none" data-magic-bento>
+    <div class="row" style="justify-content:space-between">
+      <div class="row">
+        <button id="addCompanyBtn" class="btn">Add customer</button>
+        <button id="refreshCustomersBtn" class="btn secondary">Refresh</button>
+      </div>
+    </div>
+    <div style="overflow:auto">
+      <table>
+        <thead>
+          <tr><th>Customer</th><th>Agent Code</th><th>Supervisor Code</th><th>Admin Code</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="custBody"><tr><td colspan="5" style="padding:18px" class="muted">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Logs -->
+  <section id="panel" class="card" style="display:none;margin-top:18px" data-magic-bento>
+    <div class="row" style="justify-content:space-between">
+      <div class="row">
+        <select id="typeFilter">
+          <option value="">All types</option>
+          <option value="signin">Signin</option>
+          <option value="completion">Completion</option>
+        </select>
+        <input id="courseFilter" placeholder="Course (e.g., agent)">
+        <input id="search" placeholder="Search name/company">
+        <button id="refresh" class="btn secondary">Refresh</button>
+      </div>
+    </div>
+    <div style="overflow:auto">
+      <table>
+        <thead>
+          <tr><th>Time</th><th>Type</th><th>User</th><th>Course</th><th>Company</th><th>Videos Completed</th></tr>
+        </thead>
+        <tbody id="tbody"><tr><td colspan="6" class="muted" style="padding:18px">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script src="config.js?v=v1"></script>
+<script src="spark.js?v=1"></script>
+<script src="magic-bento.js?v=1"></script>
+<script src="liquid-ether.js?v=1"></script>
+<script>
+const { SCRIPT_URL, ADMIN_TOKEN, ADMIN_PASS } = window.APP_CONFIG || {};
+
+const gate = document.getElementById("gate"),
+      customers = document.getElementById("customers"),
+      panel = document.getElementById("panel"),
+      gateErr = document.getElementById("gateErr");
+
+function showApp(){ gate.style.display="none"; customers.style.display=""; panel.style.display=""; loadCustomers(); loadLogs(); }
+function showGate(){ gate.style.display=""; customers.style.display="none"; panel.style.display="none"; }
+
+// Login button
+document.getElementById("adminBtn").addEventListener("click", ()=>{
+  const v = document.getElementById("adminPass").value.trim();
+  gateErr.textContent = "";
+  if (v === ADMIN_PASS) { showApp(); }
+  else { gateErr.textContent = "Incorrect password."; }
+});
+// Enter key submits password
+document.getElementById("adminPass").addEventListener("keydown", (e)=>{
+  if (e.key === "Enter") { e.preventDefault(); document.getElementById("adminBtn").click(); }
+});
+
+// --- CUSTOMERS ---
+const custBody = document.getElementById("custBody");
+document.getElementById("refreshCustomersBtn").addEventListener("click", loadCustomers);
+
+// Use GET (no preflight) to add a customer
+document.getElementById("addCompanyBtn").addEventListener("click", async ()=>{
+  const name = prompt("Customer name"); if (!name) return;
+  try{
+    const url = `${SCRIPT_URL}?mode=addcompany&token=${encodeURIComponent(ADMIN_TOKEN)}&company=${encodeURIComponent(name)}`;
+    const res = await fetch(url);
+    const text = await res.text(); let data; try{ data = JSON.parse(text); }catch{ data = null; }
+    if(!res.ok || !data || data.ok !== true){
+      alert(text === "UNAUTHORIZED" ? "Token mismatch — check SECRET_TOKEN" : "Server error: " + text);
+      return;
     }
-  }
+    await loadCustomers();
+    alert(`Codes for "${data.company}":\nAgent: ${data.agent}\nSupervisor: ${data.supervisor}\nAdmin: ${data.admin}`);
+  }catch{ alert("Network error"); }
+});
 
-  ready(() => {
-    const cfg = (window.APP_CONFIG || {});
-    const adminPass = cfg.ADMIN_PASS || "";
+async function loadCustomers(){
+  custBody.innerHTML = `<tr><td colspan="5" style="padding:18px" class="muted">Loading…</td></tr>`;
+  try{
+    const url = `${SCRIPT_URL}?mode=customers&token=${encodeURIComponent(ADMIN_TOKEN)}`;
+    const res = await fetch(url); const text = await res.text();
+    if(!res.ok){ custBody.innerHTML = `<tr><td colspan="5" class="error">HTTP ${res.status}</td></tr>`; return; }
+    if(text === "UNAUTHORIZED"){ custBody.innerHTML = `<tr><td colspan="5" class="error">UNAUTHORIZED — token mismatch.</td></tr>`; return; }
+    const data = JSON.parse(text); const rows = (data && data.rows) ? data.rows : [];
+    if(!rows.length){ custBody.innerHTML = `<tr><td colspan="5" class="muted">No customers yet.</td></tr>`; return; }
+    custBody.innerHTML = rows.map(r=>`
+      <tr>
+        <td>${r.company||""}</td>
+        <td><code>${r.agent_code||""}</code></td>
+        <td><code>${r.supervisor_code||""}</code></td>
+        <td><code>${r.admin_code||""}</code></td>
+        <td class="action"><button class="btn secondary" data-revoke="${r.agent_code||""}">Revoke</button></td>
+      </tr>`).join('');
 
-    if (!document.body) return;
-
-    const styleId = "admin-access-style";
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement("style");
-      style.id = styleId;
-      style.textContent = `
-        .adminFab{
-          position:fixed;
-          bottom:28px;
-          right:28px;
-          z-index:998;
-          border:none;
-          border-radius:999px;
-          padding:14px 22px;
-          font-weight:700;
-          font-size:.95rem;
-          color:#051021;
-          background:linear-gradient(135deg,#22d3ee,#3b82f6);
-          box-shadow:0 20px 45px rgba(15,30,45,.55);
-          cursor:pointer;
-          transition:transform .2s ease, box-shadow .2s ease;
-        }
-        .adminFab:active{transform:translateY(2px);}
-        .adminFab:focus-visible{outline:3px solid rgba(255,255,255,.7); outline-offset:3px;}
-        .adminPopover{
-          position:fixed;
-          bottom:115px;
-          right:28px;
-          width:280px;
-          background:rgba(10,18,35,.92);
-          border:1px solid rgba(255,255,255,.16);
-          border-radius:20px;
-          padding:18px;
-          box-shadow:0 25px 70px rgba(0,0,0,.55);
-          backdrop-filter:blur(16px);
-          -webkit-backdrop-filter:blur(16px);
-          opacity:0;
-          pointer-events:none;
-          transform:translateY(10px) scale(.97);
-          transition:opacity .25s ease, transform .25s ease;
-          z-index:999;
-        }
-        .adminPopover.open{
-          opacity:1;
-          pointer-events:auto;
-          transform:translateY(0) scale(1);
-        }
-        .adminPopover h3{
-          margin:0 0 8px;
-          font-size:1rem;
-        }
-        .adminPopover form{display:flex;flex-direction:column;gap:10px;}
-        .adminPopover input{
-          border-radius:12px;
-          border:1px solid rgba(255,255,255,.2);
-          background:rgba(5,10,20,.7);
-          color:#e9edf5;
-          padding:10px 12px;
-        }
-        .adminPopover button[type="submit"]{
-          border:none;
-          border-radius:12px;
-          padding:10px 12px;
-          font-weight:700;
-          background:linear-gradient(135deg,#22d3ee,#3b82f6);
-          color:#051021;
-          cursor:pointer;
-        }
-        .adminPopover__error{min-height:18px;color:#f87171;font-weight:600;font-size:.85rem;text-align:center;}
-        .adminPopover__close{
-          position:absolute;
-          top:10px;
-          right:10px;
-          background:transparent;
-          border:none;
-          color:#94a3b8;
-          cursor:pointer;
-          font-size:1.1rem;
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
-    const fab = document.createElement("button");
-    fab.type = "button";
-    fab.className = "adminFab";
-    fab.setAttribute("aria-haspopup", "dialog");
-    fab.setAttribute("aria-expanded", "false");
-    fab.textContent = "Admin";
-
-    const popover = document.createElement("div");
-    popover.className = "adminPopover";
-    popover.setAttribute("role", "dialog");
-    popover.setAttribute("aria-modal", "false");
-    popover.innerHTML = `
-      <button class="adminPopover__close" type="button" aria-label="Close">×</button>
-      <h3>Admin access</h3>
-      <form id="adminPopoverForm">
-        <input type="password" id="adminPopoverPass" placeholder="Password" autocomplete="off" spellcheck="false" />
-        <div class="adminPopover__error" id="adminPopoverError"></div>
-        <button type="submit">Open Admin</button>
-      </form>
-    `;
-
-    document.body.appendChild(fab);
-    document.body.appendChild(popover);
-
-    const form = popover.querySelector("#adminPopoverForm");
-    const passInput = popover.querySelector("#adminPopoverPass");
-    const errorEl = popover.querySelector("#adminPopoverError");
-    const closeBtn = popover.querySelector(".adminPopover__close");
-
-    function openPopover(){
-      popover.classList.add("open");
-      fab.setAttribute("aria-expanded", "true");
-      setTimeout(()=>passInput.focus(), 50);
-      document.addEventListener("keydown", handleKey);
-    }
-    function closePopover(){
-      popover.classList.remove("open");
-      fab.setAttribute("aria-expanded", "false");
-      errorEl.textContent = "";
-      passInput.value = "";
-      document.removeEventListener("keydown", handleKey);
-    }
-    function togglePopover(){
-      if (popover.classList.contains("open")) closePopover();
-      else openPopover();
-    }
-    function handleClickOutside(event){
-      if (event.target === fab || popover.contains(event.target)) return;
-      closePopover();
-    }
-    function handleKey(event){
-      if (event.key === "Escape") closePopover();
-    }
-    fab.addEventListener("click", togglePopover);
-    closeBtn.addEventListener("click", closePopover);
-    document.addEventListener("click", handleClickOutside);
-
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const value = passInput.value.trim();
-      if (!value){
-        errorEl.textContent = "Enter admin password.";
-        return;
-      }
-      if (adminPass && value !== adminPass){
-        errorEl.textContent = "Incorrect password.";
-        return;
-      }
-      errorEl.textContent = "";
-      sessionStorage.setItem("tp_admin", "true");
-      form.querySelector("button[type=submit]").textContent = "Opening…";
-      window.location.href = "admin.html";
+    // bind revoke (GET ?mode=revoke&agent=CODE)
+    document.querySelectorAll('[data-revoke]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const agent = btn.getAttribute('data-revoke');
+        if (!agent) return;
+        if (!confirm(`Revoke and remove access for agent code "${agent}"?`)) return;
+        try{
+          const url = `${SCRIPT_URL}?mode=revoke&token=${encodeURIComponent(ADMIN_TOKEN)}&agent=${encodeURIComponent(agent)}`;
+          const res = await fetch(url);
+          const raw = await res.text(); let data; try{ data = JSON.parse(raw); }catch{ data = null; }
+          if(!res.ok || !data || data.ok !== true){ alert(raw||"Server error"); return; }
+          await loadCustomers();
+        }catch{ alert("Network error"); }
+      });
     });
+  }catch{ custBody.innerHTML = `<tr><td colspan="5" class="error">Network error</td></tr>`; }
+}
+
+// --- LOGS ---
+const tbody = document.getElementById("tbody"),
+      typeFilter = document.getElementById("typeFilter"),
+      courseFilter = document.getElementById("courseFilter"),
+      search = document.getElementById("search");
+document.getElementById("refresh").addEventListener("click", loadLogs);
+let allRows = [];
+async function loadLogs(){
+  tbody.innerHTML = `<tr><td colspan="6" class="muted" style="padding:18px">Loading…</td></tr>`;
+  try{
+    const url = `${SCRIPT_URL}?mode=json&token=${encodeURIComponent(ADMIN_TOKEN)}&limit=2000`;
+    const res = await fetch(url); const text = await res.text();
+    if(!res.ok){ tbody.innerHTML = `<tr><td colspan="6" class="error">HTTP ${res.status}</td></tr>`; return; }
+    if(text === "UNAUTHORIZED"){ tbody.innerHTML = `<tr><td colspan="6" class="error">UNAUTHORIZED</td></tr>`; return; }
+    const data = JSON.parse(text);
+    allRows = (data && data.rows) ? data.rows : [];
+    // newest first
+    allRows.sort((a,b)=> new Date(b.ts_server) - new Date(a.ts_server));
+    renderLogs();
+  }catch{ tbody.innerHTML = `<tr><td colspan="6" class="error">Failed to load logs.</td></tr>`; }
+}
+function renderLogs(){
+  const t = s => (s==null||s==="") ? "" : String(s);
+  const q = search.value.trim().toLowerCase(),
+        tf = typeFilter.value.trim().toLowerCase(),
+        cf = courseFilter.value.trim().toLowerCase();
+  const rows = allRows.filter(r=>{
+    const okType = !tf || t(r.type).toLowerCase()===tf;
+    const okCourse = !cf || t(r.course).toLowerCase().includes(cf);
+    const text = (t(r.name)+" "+t(r.company)).toLowerCase();
+    return okType && okCourse && (!q || text.includes(q));
   });
-})();
+  if(!rows.length){ tbody.innerHTML = `<tr><td colspan="6" class="muted" style="padding:18px">No rows.</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r=>{
+    let vidsDisplay = "";
+    if (r.videos_json) {
+      try { vidsDisplay = JSON.parse(r.videos_json).map(x=>x.title||x.src||"").join(", "); }
+      catch { vidsDisplay = r.videos_json; }
+    }
+    const timeStr = r.ts_server ? new Date(r.ts_server).toLocaleString("en-US",{month:"numeric",day:"numeric",year:"2-digit",hour:"numeric",minute:"2-digit"}) : "";
+    return `<tr>
+      <td>${timeStr}</td>
+      <td>${r.type||""}</td>
+      <td>${r.name||""}</td>
+      <td>${r.course||""}</td>
+      <td>${r.company||""}</td>
+      <td>${vidsDisplay||""}</td>
+    </tr>`;
+  }).join("");
+}
+
+if (sessionStorage.getItem("tp_admin") === "true") {
+  showApp();
+}
+</script>
+</body>
+</html>
